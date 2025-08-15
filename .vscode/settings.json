@@ -1,0 +1,10 @@
+{
+    "workbench.colorTheme": "One Dark Pro Darker",
+    "workbench.preferredDarkColorTheme": "Tomorrow Night Blue",
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.colorCustomizations": {
+
+    },
+    "workbench.preferredHighContrastColorTheme": "Tomorrow Night Blue",
+    "material-icon-theme.activeIconPack": "react"
+}

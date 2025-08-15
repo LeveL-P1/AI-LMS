@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  name        String?
+  role        Role         @default(STUDENT)
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
+  submissions Submission[]
+  progress    Progress[]
+  createdAt   DateTime     @default(now())
+}
+
+model Course {
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  category     String?
+  price        Float        @default(0)
+  published    Boolean      @default(false)
+  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id])
+  instructorId String
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  assignments  Assignment[]
+  createdAt    DateTime     @default(now())
+}
+
+model Lesson {
+  id        String     @id @default(cuid())
+  title     String
+  content   String?
+  videoUrl  String?
+  order     Int        @default(0)
+  course    Course     @relation(fields: [courseId], references: [id])
+  courseId  String
+  createdAt DateTime   @default(now())
+  progress  Progress[]
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Assignment {
+  id          String       @id @default(cuid())
+  title       String
+  content     String?
+  course      Course       @relation(fields: [courseId], references: [id])
+  courseId    String
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+}
+
+model Submission {
+  id           String     @id @default(cuid())
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId String
+  student      User       @relation(fields: [studentId], references: [id])
+  studentId    String
+  content      String
+  grade        Int?
+  submittedAt  DateTime   @default(now())
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  user      User     @relation(fields: [userId], references: [id])
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
