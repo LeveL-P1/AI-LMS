@@ -23,3 +23,4 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
+// fixed and changes the routes and 
