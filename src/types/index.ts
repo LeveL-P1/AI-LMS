@@ -1,5 +1,9 @@
 // User types
-export type UserRole = "student" | "instructor" | "admin";
+export enum UserRole {
+  STUDENT = "student",
+  INSTRUCTOR = "instructor", 
+  ADMIN = "admin"
+}
 
 export interface User {
   id: string;

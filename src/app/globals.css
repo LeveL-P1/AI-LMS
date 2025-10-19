@@ -139,6 +139,25 @@ html {
   }
 }
 
+/* Theme-specific background controls */
+.dark .light-mode-bg {
+  opacity: 0;
+}
+
+.dark .dark-mode-bg {
+  opacity: 1;
+}
+
+.light-mode-bg {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.dark-mode-bg {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
 /* Custom animations */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }

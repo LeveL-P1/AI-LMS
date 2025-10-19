@@ -15,7 +15,7 @@ export default function Header() {
   return (
     // <header className="sticky top-2 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]
     // :bg-background/60">
-    <header className="sticky top-4 z-50 mx-auto max-w-6xl w-full bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 flex justify-center items-center overflow-hidden rounded-2xl border-b-2 border-solid border-border shadow-sm">
+    <header className="sticky top-8 z-50 mx-auto max-w-6xl w-full bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 flex justify-center items-center overflow-hidden rounded-2xl border-b-2 border-solid border-border shadow-sm">
       <div className="flex h-16 items-center w-full px-4">
         {/* Logo */}
         <div className=" mr-6 ml-4 flex items-center space-x-2">
