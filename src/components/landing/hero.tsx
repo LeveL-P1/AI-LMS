@@ -22,7 +22,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background">
+    <section className="relative overflow-hidden">
       <div className="relative container mx-auto px-4 py-24 sm:py-32">
         <motion.div 
           className="flex flex-col items-center text-center space-y-8"
@@ -51,7 +51,7 @@ export default function Hero() {
                 Master Any Skill with
               </motion.span>
               <motion.span 
-                className="block bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent"
+                className="block bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text "
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
@@ -63,8 +63,7 @@ export default function Hero() {
               className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl"
               variants={fadeInUp}
             >
-              Transform your education with personalized learning paths, interactive quizzes, 
-              and real-time AI feedback. Join thousands of learners achieving their goals.
+             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Necessitatibus mollitia quibusdam consequatur.
             </motion.p>
           </motion.div>
 

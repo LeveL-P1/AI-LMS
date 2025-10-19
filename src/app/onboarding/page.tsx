@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { GraduationCap, BookOpen, Users, Settings, ArrowRight } from "lucide-react";
 
 const roles = [
@@ -68,18 +67,32 @@ export default function OnboardingPage() {
     setLoading(true);
     
     try {
-      // Update user metadata with selected role
-      await user.update({
-        unsafeMetadata: {
-          role: selectedRole,
-          onboardingCompleted: true
-        }
+      // Map role to database format
+      const roleMap = {
+        'student': 'STUDENT',
+        'instructor': 'INSTRUCTOR',
+        'admin': 'ADMIN'
+      };
+
+      // Update user role in database and Clerk metadata
+      const response = await fetch('/api/user/role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role: roleMap[selectedRole as keyof typeof roleMap]
+        }),
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to update user role');
+      }
+
       // Redirect based on role
-      const redirectPath = selectedRole === 'admin' ? '/admin' : 
-                          selectedRole === 'instructor' ? '/instructor' : 
-                          '/student';
+      const redirectPath = selectedRole === 'admin' ? '/dashboard/admin' : 
+                          selectedRole === 'instructor' ? '/dashboard/instructor' : 
+                          '/dashboard/student';
       
       router.push(redirectPath);
     } catch (error) {
@@ -98,7 +111,7 @@ export default function OnboardingPage() {
               <GraduationCap className="h-7 w-7 text-primary-foreground" />
             </div>
             <span className="font-bold text-3xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              LearnDash
+              SkillSyncAI
             </span>
           </div>
           
@@ -122,13 +135,7 @@ export default function OnboardingPage() {
               }`}
               onClick={() => setSelectedRole(role.id)}
             >
-              {role.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground">
-                    Most Popular
-                  </Badge>
-                </div>
-              )}
+           
               
               <CardHeader className="text-center">
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${role.color} mx-auto mb-4`}>

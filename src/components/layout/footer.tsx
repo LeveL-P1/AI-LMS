@@ -13,7 +13,8 @@ export default function Footer() {
                 <GraduationCap className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                LearnDash
+                SkillSyncAI
+                
               </span>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
@@ -71,7 +72,7 @@ export default function Footer() {
 
         <div className="border-t pt-8 mt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © 2025 LearnDash. All rights reserved.
+            © 2025 SkillSyncAI. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Build by @Level_P1 for learners worldwide
