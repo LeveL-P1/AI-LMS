@@ -1,4 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+interface SessionMetadata {
+  role?: string;
+}
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -13,6 +18,40 @@ export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
     await auth.protect();
   }
+
+  const pathname = request.nextUrl.pathname;
+
+  // Handle dashboard routing based on user role
+  if (pathname === "/dashboard") {
+    const { sessionClaims } = await auth();
+    const role = (sessionClaims?.metadata as SessionMetadata)?.role as string | undefined;
+    const userRole = role || "student";
+    
+    const validRoles = ["student", "instructor", "admin"];
+    if (!validRoles.includes(userRole)) {
+      return NextResponse.redirect(new URL("/dashboard/student", request.url));
+    }
+
+    return NextResponse.redirect(new URL(`/dashboard/${userRole}`, request.url));
+  }
+
+  // Protect role-specific dashboard routes
+  if (pathname.startsWith("/dashboard/")) {
+    const { sessionClaims } = await auth();
+    const role = (sessionClaims?.metadata as SessionMetadata)?.role as string | undefined;
+    const userRole = role || "student";
+    
+    const pathSegments = pathname.split("/");
+    const requestedRole = pathSegments[2];
+    
+    if (requestedRole === userRole) {
+      return NextResponse.next();
+    }
+    
+    return NextResponse.redirect(new URL(`/dashboard/${userRole}`, request.url));
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {

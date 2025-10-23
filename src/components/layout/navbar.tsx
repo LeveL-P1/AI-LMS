@@ -6,8 +6,13 @@ import { UserButton } from "@clerk/nextjs"
 import { BookOpen, Home, Users, BarChart3, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useUser } from "@/hooks/use-user"
+import { UserRole } from "@/types"
 
-export function Navbar() {
+interface NavbarProps {
+  userRole?: UserRole
+}
+
+export function Navbar({ userRole }: NavbarProps) {
   const { isLoaded, isSignedIn, role, isStudent, isInstructor } = useUser()
 
   // Don't render until loaded

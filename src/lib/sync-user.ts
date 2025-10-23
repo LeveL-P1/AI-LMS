@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "./db";
 import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/types"

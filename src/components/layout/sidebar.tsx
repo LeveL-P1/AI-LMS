@@ -20,8 +20,8 @@ interface SidebarProps {
 
 export function Sidebar({ userRole = UserRole.STUDENT}: SidebarProps) {
   const pathname = usePathname()
-  const isStudent = userRole = UserRole.STUDENT
-  const isInstructor = userRole = UserRole.INSTRUCTOR
+  const isStudent = userRole === UserRole.STUDENT
+  const isInstructor = userRole === UserRole.INSTRUCTOR
 
   const studentLinks = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
