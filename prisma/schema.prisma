@@ -1,3 +1,6 @@
+// SkillSyncAI Database Schema - Enhanced for Supabase
+// This keeps your current working schema while adding Supabase optimizations
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -193,3 +196,6 @@ model AssignmentSubmission {
   @@index([assignmentId])
   @@map("assignment_submissions")
 }
+
+// Note: We'll add AI features (from schema-skillsyncai.prisma) gradually in upcoming phases
+// This keeps your current working setup stable while we build new features
