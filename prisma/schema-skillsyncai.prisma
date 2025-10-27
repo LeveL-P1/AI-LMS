@@ -1,0 +1,294 @@
+// SkillSyncAI Enhanced Schema
+// This enhances your existing schema with AI features and file management
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  role      UserRole @default(STUDENT)
+  // AI Enhancement: User preferences for recommendations
+  interests String[] // Array of interest topics
+  skillLevel String? // Beginner, Intermediate, Advanced
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Student relations
+  enrollments  Enrollment[]
+  quizAttempts QuizAttempt[]
+  assignments  AssignmentSubmission[]
+  // AI Enhancement: Track AI interactions
+  aiRecommendations AIRecommendation[]
+
+  // Instructor relations
+  createdCourses Course[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  imageUrl     String?
+  price        Float?
+  isPublished  Boolean  @default(false)
+  categoryId   String?
+  instructorId String
+  // AI Enhancement: Course metadata for AI recommendations
+  difficulty   String?  // Beginner, Intermediate, Advanced
+  tags         String[] // Array of tags for AI matching
+  estimatedDuration Int? // in hours
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  instructor  User         @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  chapters    Chapter[]
+  enrollments Enrollment[]
+  quizzes     Quiz[]
+  // AI Enhancement: Link assignments to courses
+  assignments Assignment[]
+  // AI Enhancement: AI recommendations for this course
+  aiRecommendations AIRecommendation[]
+
+  @@index([categoryId])
+  @@index([instructorId])
+  @@map("courses")
+}
+
+model Category {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  // AI Enhancement: Category description for better AI understanding
+  description String?
+  courses Course[]
+
+  @@map("categories")
+}
+
+model Chapter {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  videoUrl    String?
+  // Enhancement: Support multiple content types
+  contentType String?  // video, text, pdf, etc.
+  contentUrl  String?  // For PDFs, documents, etc.
+  content     String?  // Text content for AI processing
+  position    Int
+  isPublished Boolean  @default(false)
+  isFree      Boolean  @default(false)
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userProgress UserProgress[]
+  // AI Enhancement: AI-generated quizzes from chapter content
+  aiGeneratedQuizzes Quiz[]
+
+  @@index([courseId])
+  @@map("chapters")
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  // Enhancement: Track enrollment progress
+  progress  Float    @default(0) // Percentage completion
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model UserProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  chapterId   String
+  isCompleted Boolean  @default(false)
+  // Enhancement: Track time spent
+  timeSpent   Int?     @default(0) // in minutes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@index([chapterId])
+  @@map("user_progress")
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  courseId    String?
+  chapterId   String?  // AI Enhancement: Link to specific chapter
+  timeLimit   Int?     // in minutes
+  isPublished Boolean  @default(false)
+  // AI Enhancement: Mark AI-generated quizzes
+  isAIGenerated Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course    Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapter   Chapter?       @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([courseId])
+  @@index([chapterId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            String   @id @default(cuid())
+  question      String
+  options       Json     // Store as JSON array
+  correctAnswer String
+  explanation   String?  // Enhancement: Explanation for correct answer
+  quizId        String
+  createdAt     DateTime @default(now())
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  quizId    String
+  score     Float
+  answers   Json     // Store user answers as JSON
+  // Enhancement: Track time taken
+  timeSpent Int?     // in minutes
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempts")
+}
+
+model Assignment {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  instructions String?  // Enhancement: Detailed instructions
+  dueDate     DateTime?
+  courseId    String    // Enhancement: Link to course
+  maxPoints   Int?      // Enhancement: Grading points
+  allowedFileTypes String[] // Enhancement: Specify allowed file types
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  course      Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions AssignmentSubmission[]
+
+  @@index([courseId])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String   @id @default(cuid())
+  userId       String
+  assignmentId String
+  fileUrl      String?
+  fileName     String?  // Enhancement: Store original filename
+  content      String?
+  grade        Float?
+  feedback     String?
+  status       SubmissionStatus @default(SUBMITTED)
+  submittedAt  DateTime @default(now())
+  gradedAt     DateTime?
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, assignmentId])
+  @@index([assignmentId])
+  @@map("assignment_submissions")
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  GRADED
+  LATE
+  MISSING
+}
+
+// AI Enhancement: AI Recommendation System
+model AIRecommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  reason      String   // Why this course is recommended
+  confidence  Float    // AI confidence score (0-1)
+  isViewed    Boolean  @default(false)
+  isAccepted  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+  @@map("ai_recommendations")
+}
+
+// AI Enhancement: Store AI Analytics
+model AIAnalytics {
+  id          String   @id @default(cuid())
+  userId      String?
+  courseId    String?
+  analyticsType String // "performance", "recommendation", "quiz_generation"
+  data        Json     // Store analysis results
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([courseId])
+  @@map("ai_analytics")
+}
+
+// Enhancement: File Management
+model FileUpload {
+  id        String   @id @default(cuid())
+  filename  String
+  originalName String
+  fileUrl   String
+  fileSize  Int      // in bytes
+  mimeType  String
+  uploadedBy String   // User ID
+  createdAt DateTime @default(now())
+
+  @@map("file_uploads")
+}
