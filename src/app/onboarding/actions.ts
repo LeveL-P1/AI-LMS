@@ -22,7 +22,8 @@ export async function updateUserRole(role: string) {
     }
 
     // Update user role in Clerk's public metadata
-    await clerkClient().users.updateUserMetadata(userId, {
+    const clerk = await clerkClient()
+    await clerk.users.updateUserMetadata(userId, {
       publicMetadata: {
         role: upperRole
       }
