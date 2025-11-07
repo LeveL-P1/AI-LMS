@@ -7,13 +7,27 @@ export async function POST(req: NextRequest) {
     const user = await currentUser()
     
     if (!user) {
+      console.error('Unauthorized: No user session found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { role } = await req.json()
 
     if (!role || !['STUDENT', 'INSTRUCTOR', 'ADMIN'].includes(role)) {
+      console.error('Invalid role received:', role)
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+    }
+
+    // Check if user exists in DB
+    const existingUser = await db.user.findUnique({
+      where: {
+        clerkId: user.id,
+      },
+    })
+    
+    if (!existingUser) {
+      console.error('User not found in DB for clerkId:', user.id)
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Update user role in database
