@@ -49,3 +49,6 @@
  ✓ Compiled in 577ms
  ○ Compiling middleware ...
  ✓ Compiled middleware in 1127ms
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 1263ms
+Terminate batch job (Y/N)? [?25h

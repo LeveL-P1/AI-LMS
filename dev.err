@@ -43,3 +43,7 @@ Error: Route "/courses/[courseId]/quiz/[quizId]" used `params.courseId`. `params
   18 |     'use server'
   19 |
   20 |     // Require an authenticated user inside the server action
+ ⚠ Failed to reload dynamic routes: [Error: You cannot use different slug names for the same dynamic path ('courseId' !== 'id').]
+[Error: You cannot use different slug names for the same dynamic path ('courseId' !== 'id').]
+ ⨯ unhandledRejection: [Error: You cannot use different slug names for the same dynamic path ('courseId' !== 'id').]
+ ⨯ unhandledRejection:  [Error: You cannot use different slug names for the same dynamic path ('courseId' !== 'id').]
