@@ -47,3 +47,5 @@
  ✓ Compiled in 1157ms
  ✓ Compiled in 1011ms
  ✓ Compiled in 577ms
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 1127ms
