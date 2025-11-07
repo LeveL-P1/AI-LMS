@@ -22,15 +22,21 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
   // Find enrollment
   const enrolled = userId && course.enrollments.some(e => e.userId === userId)
 
-  async function enroll() {
+  async function enroll(formData: FormData) {
     'use server'
     if (!userId) redirect('/sign-in')
-    await db.enrollment.upsert({
-      where: { userId_courseId: { userId, courseId: course.id } },
-      update: {},
-      create: { userId, courseId: course.id },
-    })
-    redirect(`/courses/${course.id}`)
+
+    try {
+      await db.enrollment.upsert({
+        where: { userId_courseId: { userId, courseId: course.id } },
+        update: {},
+        create: { userId, courseId: course.id },
+      })
+      redirect(`/courses/${course.id}`)
+    } catch (error) {
+      console.error('Enrollment failed:', error)
+      throw new Error('Failed to enroll in course')
+    }
   }
 
   return (
