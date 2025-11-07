@@ -11,6 +11,13 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
+  // Expose public course pages and the public courses API for unauthenticated smoke tests
+  "/courses(.*)",
+  "/api/courses(.*)",
+  // Allow quiz pages and enrollments API to be reachable for local smoke tests
+  // NOTE: This is intended for short-lived local testing. Remove before production.
+  "/courses(.*)/quiz(.*)",
+  "/api/enrollments(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

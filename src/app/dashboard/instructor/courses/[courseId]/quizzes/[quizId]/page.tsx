@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export default async function QuizQuestionsPage({ params }: { params: { courseId: string, quizId: string } }) {
+export default async function QuizQuestionsPage(props: any) {
+  const { params } = props as { params: { courseId: string; quizId: string } }
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
@@ -12,6 +13,10 @@ export default async function QuizQuestionsPage({ params }: { params: { courseId
     include: { questions: true, course: true }
   })
   if (!quiz) redirect(`/dashboard/instructor/courses/${params.courseId}/quizzes`)
+
+  // Capture identifiers used by server actions to avoid closing over `quiz`
+  const quizId = quiz.id
+  const quizCourseId = quiz.courseId
 
   async function addQuestion(formData: FormData) {
     'use server'
@@ -26,28 +31,28 @@ export default async function QuizQuestionsPage({ params }: { params: { courseId
     await db.quizQuestion.create({
       data: {
         question,
-        options: options as any,
+        options: options as unknown as object,
         correctAnswer,
         explanation,
-        quizId: quiz.id
+        quizId: quizId
       }
     })
 
-    revalidatePath(`/dashboard/instructor/courses/${quiz.courseId}/quizzes/${quiz.id}`)
+    revalidatePath(`/dashboard/instructor/courses/${quizCourseId}/quizzes/${quizId}`)
   }
 
   async function publishQuiz() {
     'use server'
-    await db.quiz.update({ where: { id: quiz.id }, data: { isPublished: true } })
-    revalidatePath(`/dashboard/instructor/courses/${quiz.courseId}/quizzes`)
-    redirect(`/dashboard/instructor/courses/${quiz.courseId}/quizzes`)
+  await db.quiz.update({ where: { id: quizId }, data: { isPublished: true } })
+  revalidatePath(`/dashboard/instructor/courses/${quizCourseId}/quizzes`)
+  redirect(`/dashboard/instructor/courses/${quizCourseId}/quizzes`)
   }
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Questions • {quiz.title}</h1>
-        <p className="text-sm text-muted-foreground">Add multiple choice questions. Options as JSON array, e.g. ["A","B","C","D"].</p>
+  <p className="text-sm text-muted-foreground">Add multiple choice questions. Options as JSON array, e.g. {"[\"A\",\"B\",\"C\",\"D\"]"}.</p>
       </div>
 
       <form action={addQuestion} className="space-y-4 border rounded-md p-4">

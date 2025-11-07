@@ -1,6 +1,4 @@
-// ============================================
-// FILE: src/app/courses/browse/page.tsx
-// ============================================
+
 import { syncUser } from '@/lib/sync-user'
 import { redirect } from 'next/navigation'
 import { currentUser } from '@clerk/nextjs/server'

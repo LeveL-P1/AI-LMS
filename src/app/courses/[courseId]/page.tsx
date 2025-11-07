@@ -4,12 +4,13 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
-export default async function CourseDetailPage({ params }: { params: { id: string } }) {
+export default async function CourseDetailPage(props: any) {
+  const { params } = props as { params: { courseId: string } }
   const { userId } = await auth()
 
   // Fetch course detail & lessons
   const course = await db.course.findUnique({
-    where: { id: params.id, isPublished: true },
+    where: { id: params.courseId, isPublished: true },
     include: {
       instructor: true,
       chapters: { orderBy: { position: 'asc' } },
@@ -18,21 +19,23 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
   })
 
   if (!course) return <div className="p-8 text-center text-muted-foreground">Course not found.</div>
+  // Capture primitives
+  const courseId = course.id
 
   // Find enrollment
   const enrolled = userId && course.enrollments.some(e => e.userId === userId)
 
-  async function enroll(formData: FormData) {
+  async function enroll() {
     'use server'
     if (!userId) redirect('/sign-in')
 
     try {
       await db.enrollment.upsert({
-        where: { userId_courseId: { userId, courseId: course.id } },
+        where: { userId_courseId: { userId, courseId } },
         update: {},
-        create: { userId, courseId: course.id },
+        create: { userId, courseId },
       })
-      redirect(`/courses/${course.id}`)
+      redirect(`/courses/${courseId}`)
     } catch (error) {
       console.error('Enrollment failed:', error)
       throw new Error('Failed to enroll in course')

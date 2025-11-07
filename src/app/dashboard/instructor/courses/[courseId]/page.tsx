@@ -5,16 +5,21 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default async function ManageCoursePage({ params }: { params: { id: string } }) {
+export default async function ManageCoursePage(props: any) {
+  const { params } = props as { params: { courseId: string } }
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
   const course = await db.course.findFirst({
-    where: { id: params.id },
+    where: { id: params.courseId },
     include: { chapters: { orderBy: { position: 'asc' } } },
   })
 
   if (!course) redirect('/dashboard/instructor/courses')
+  // Capture primitives from `course` to avoid closing over the full object in server actions
+  const courseId = course.id
+  const chapters = course.chapters ?? []
+  const courseIsPublished = course.isPublished
 
   async function addLesson(formData: FormData) {
     'use server'
@@ -34,7 +39,7 @@ export default async function ManageCoursePage({ params }: { params: { id: strin
       throw new Error('Video URL must be valid')
     }
 
-    const position = course.chapters.length > 0 ? course.chapters[course.chapters.length - 1].position + 1 : 1
+  const position = chapters.length > 0 ? chapters[chapters.length - 1].position + 1 : 1
 
     await db.chapter.create({
       data: {
@@ -42,22 +47,22 @@ export default async function ManageCoursePage({ params }: { params: { id: strin
         description,
         videoUrl,
         position,
-        courseId: course.id,
+    courseId: courseId,
         isPublished: false,
       },
     })
 
-    redirect(`/dashboard/instructor/courses/${course.id}`)
+    redirect(`/dashboard/instructor/courses/${courseId}`)
   }
 
   async function togglePublish() {
     'use server'
     await db.course.update({
-      where: { id: course.id },
-      data: { isPublished: !course.isPublished },
+      where: { id: courseId },
+      data: { isPublished: !courseIsPublished },
     })
 
-    redirect(`/dashboard/instructor/courses/${course.id}`)
+    redirect(`/dashboard/instructor/courses/${courseId}`)
   }
 
   return (

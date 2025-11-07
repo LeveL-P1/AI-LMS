@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export default async function NewQuizPage({ params }: { params: { courseId: string } }) {
+export default async function NewQuizPage(props: any) {
+  const { params } = props as { params: { courseId: string } }
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
@@ -11,6 +12,8 @@ export default async function NewQuizPage({ params }: { params: { courseId: stri
     where: { id: params.courseId, instructor: { clerkId: userId } },
   })
   if (!course) redirect('/dashboard/instructor')
+
+  const courseId = course.id
 
   async function createQuiz(formData: FormData) {
     'use server'
@@ -21,13 +24,13 @@ export default async function NewQuizPage({ params }: { params: { courseId: stri
       data: {
         title,
         description,
-        courseId: course.id,
+        courseId: courseId,
         isPublished: false,
       }
     })
 
-    revalidatePath(`/dashboard/instructor/courses/${course.id}/quizzes`)
-    redirect(`/dashboard/instructor/courses/${course.id}/quizzes`)
+    revalidatePath(`/dashboard/instructor/courses/${courseId}/quizzes`)
+    redirect(`/dashboard/instructor/courses/${courseId}/quizzes`)
   }
 
   return (

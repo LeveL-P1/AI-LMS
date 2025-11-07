@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
-export default async function LessonViewPage({ params }: { params: { id: string, lessonId: string } }) {
+export default async function LessonViewPage(props: any) {
+  const { params } = props as { params: { courseId: string; lessonId: string } }
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
@@ -15,26 +16,33 @@ export default async function LessonViewPage({ params }: { params: { id: string,
   })
   if (!lesson) return <div className="p-8 text-center text-muted-foreground">Lesson not found.</div>
 
+  // Capture primitive IDs for server actions (avoid closing over full `lesson` object)
+  const lessonId = lesson.id
+  const courseId = lesson.courseId
+
+  // Narrow userId for later server actions
+  const uid = userId as string
+
   // Check enrollment
   const enrollment = await db.enrollment.findUnique({
-    where: { userId_courseId: { userId, courseId: lesson.courseId } },
+    where: { userId_courseId: { userId: uid, courseId } },
   })
-  if (!enrollment) redirect(`/courses/${lesson.courseId}`)
+  if (!enrollment) redirect(`/courses/${courseId}`)
 
   // Find progress
   const userProgress = await db.userProgress.findUnique({
-    where: { userId_chapterId: { userId, chapterId: lesson.id } },
+    where: { userId_chapterId: { userId: uid, chapterId: lessonId } },
   })
 
   async function markComplete() {
     'use server'
     try {
       await db.userProgress.upsert({
-        where: { userId_chapterId: { userId, chapterId: lesson.id } },
+        where: { userId_chapterId: { userId: uid, chapterId: lessonId } },
         update: { isCompleted: true },
-        create: { userId, chapterId: lesson.id, isCompleted: true, timeSpent: 0 },
+        create: { userId: uid, chapterId: lessonId, isCompleted: true, timeSpent: 0 },
       })
-      redirect(`/courses/${lesson.courseId}/lessons/${lesson.id}`)
+      redirect(`/courses/${courseId}/lessons/${lessonId}`)
     } catch (error) {
       console.error('Mark complete failed:', error)
       throw new Error('Failed to mark lesson complete')
@@ -66,7 +74,7 @@ export default async function LessonViewPage({ params }: { params: { id: string,
         <div className="text-green-600 font-bold">Completed ✅</div>
       )}
       <div className="mt-6">
-        <Link href={`/courses/${lesson.courseId}`}>
+        <Link href={`/courses/${courseId}`}>
           <Button variant="outline">Back to course</Button>
         </Link>
       </div>

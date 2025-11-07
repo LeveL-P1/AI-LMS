@@ -102,11 +102,8 @@ const mockCourseDetail = {
     ],
 }
 
-export default async function CourseDetailPage({
-    params,
-}: {
-    params: { courseId: string }
-}) {
+export default async function CourseDetailPage(props: any) {
+    const { params } = props as { params: { courseId: string } }
     const clerkUser = await currentUser()
 
     if (!clerkUser) {

@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default async function QuizListPage({ params }: { params: { courseId: string } }) {
+export default async function QuizListPage(props: any) {
+  const { params } = props as { params: { courseId: string } }
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 

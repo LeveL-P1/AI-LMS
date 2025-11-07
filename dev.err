@@ -1,0 +1,45 @@
+Error: Route "/courses/[courseId]" used `params.courseId`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at CourseDetailPage (src\app\courses\[courseId]\page.tsx:12:24)
+  10 |   // Fetch course detail & lessons
+  11 |   const course = await db.course.findUnique({
+> 12 |     where: { id: params.courseId, isPublished: true },
+     |                        ^
+  13 |     include: {
+  14 |       instructor: true,
+  15 |       chapters: { orderBy: { position: 'asc' } },
+Error: Route "/courses/[courseId]" used `params.courseId`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at CourseDetailPage (src\app\courses\[courseId]\page.tsx:12:24)
+  10 |   // Fetch course detail & lessons
+  11 |   const course = await db.course.findUnique({
+> 12 |     where: { id: params.courseId, isPublished: true },
+     |                        ^
+  13 |     include: {
+  14 |       instructor: true,
+  15 |       chapters: { orderBy: { position: 'asc' } },
+Error: Route "/courses/[courseId]/quiz/[quizId]" used `params.quizId`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at TakeQuizPage (src\app\courses\[courseId]\quiz\[quizId]\page.tsx:11:24)
+   9 |
+  10 |   const quiz = await db.quiz.findFirst({
+> 11 |     where: { id: params.quizId, courseId: params.courseId, isPublished: true },
+     |                        ^
+  12 |     include: { questions: true, course: true }
+  13 |   })
+  14 |
+Error: Route "/courses/[courseId]/quiz/[quizId]" used `params.courseId`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at TakeQuizPage (src\app\courses\[courseId]\quiz\[quizId]\page.tsx:11:49)
+   9 |
+  10 |   const quiz = await db.quiz.findFirst({
+> 11 |     where: { id: params.quizId, courseId: params.courseId, isPublished: true },
+     |                                                 ^
+  12 |     include: { questions: true, course: true }
+  13 |   })
+  14 |
+Error: Route "/courses/[courseId]/quiz/[quizId]" used `params.courseId`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at TakeQuizPage (src\app\courses\[courseId]\quiz\[quizId]\page.tsx:17:2)
+  15 |   if (!quiz) redirect(`/courses/${params.courseId}`)
+  16 |
+> 17 |   async function submitAnswers(formData: FormData) {
+     |  ^
+  18 |     'use server'
+  19 |
+  20 |     // Require an authenticated user inside the server action

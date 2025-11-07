@@ -1,0 +1,49 @@
+
+> skillsyncai@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.4.1 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.103:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 1579ms
+ ✓ Ready in 5.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 15.5s
+ GET / 200 in 17822ms
+ ○ Compiling /_not-found/page ...
+ ✓ Compiled /_not-found/page in 1672ms
+ GET /api/courses 404 in 2106ms
+ GET /api/enrollments 404 in 452ms
+ GET /courses/cmhopume9000gu570eix14o5m 404 in 287ms
+ GET /courses/cmhopume9000gu570eix14o5m/quiz/cmhopuo6b001gu570ixpu3c5f 404 in 304ms
+ ✓ Compiled middleware in 128ms
+ ✓ Compiled in 1442ms
+ GET / 200 in 1025ms
+ ○ Compiling /api/courses ...
+ ✓ Compiled /api/courses in 3.1s
+ GET /api/courses 200 in 4598ms
+ ○ Compiling /courses/[courseId] ...
+ ✓ Compiled /courses/[courseId] in 1531ms
+ GET /courses/cmhopume9000gu570eix14o5m 200 in 5699ms
+ ○ Compiling /courses/[courseId]/quiz/[quizId] ...
+ ✓ Compiled /courses/[courseId]/quiz/[quizId] in 2.3s
+ GET /courses/cmhopume9000gu570eix14o5m/quiz/cmhopuo6b001gu570ixpu3c5f 307 in 5637ms
+ ✓ Compiled middleware in 101ms
+ ✓ Compiled in 484ms
+ GET / 200 in 503ms
+ GET /api/courses 200 in 348ms
+ ○ Compiling /api/enrollments ...
+ ✓ Compiled /api/enrollments in 1432ms
+ GET /api/enrollments 405 in 1653ms
+ GET /courses/cmhopume9000gu570eix14o5m 200 in 551ms
+ GET /courses/cmhopume9000gu570eix14o5m/quiz/cmhopuo6b001gu570ixpu3c5f 307 in 377ms
+ ✓ Compiled in 632ms
+ ✓ Compiled /courses/[courseId]/quiz/[quizId] in 157ms
+ GET /courses/cmhopume9000gu570eix14o5m/quiz/cmhopuo6b001gu570ixpu3c5f 200 in 1359ms
+ ✓ Compiled in 1157ms
+ ✓ Compiled in 1011ms
+ ✓ Compiled in 577ms
