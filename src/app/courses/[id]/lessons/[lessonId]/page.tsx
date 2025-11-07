@@ -25,14 +25,20 @@ export default async function LessonViewPage({ params }: { params: { id: string,
   const userProgress = await db.userProgress.findUnique({
     where: { userId_chapterId: { userId, chapterId: lesson.id } },
   })
+
   async function markComplete() {
     'use server'
-    await db.userProgress.upsert({
-      where: { userId_chapterId: { userId, chapterId: lesson.id } },
-      update: { isCompleted: true },
-      create: { userId, chapterId: lesson.id, isCompleted: true, timeSpent: 0 },
-    })
-    redirect(`/courses/${lesson.courseId}/lessons/${lesson.id}`)
+    try {
+      await db.userProgress.upsert({
+        where: { userId_chapterId: { userId, chapterId: lesson.id } },
+        update: { isCompleted: true },
+        create: { userId, chapterId: lesson.id, isCompleted: true, timeSpent: 0 },
+      })
+      redirect(`/courses/${lesson.courseId}/lessons/${lesson.id}`)
+    } catch (error) {
+      console.error('Mark complete failed:', error)
+      throw new Error('Failed to mark lesson complete')
+    }
   }
 
   return (
