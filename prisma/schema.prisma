@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+model User {
+  id            String      @id @default(cuid())
+  clerkId       String      @unique
+  email         String      @unique
+  firstName     String
+  lastName      String
+  role          UserRole    @default(STUDENT)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  enrollments   Enrollment[]
+  courses       Course[]    @relation("CourseInstructor")
+}
+
+model Course {
+  id            String      @id @default(cuid())
+  title         String
+  description   String
+  imageUrl      String?
+  price         Float       @default(0)
+  isPublished   Boolean     @default(false)
+  categoryId    String?
+  instructorId  String
+  instructor    User        @relation("CourseInstructor", fields: [instructorId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  enrollments   Enrollment[]
+  lessons       Lesson[]
+  quizzes       Quiz[]
+
+  @@index([instructorId])
+}
+
+model Lesson {
+  id            String      @id @default(cuid())
+  title         String
+  description   String
+  videoUrl      String?
+  position      Int
+  isPublished   Boolean     @default(false)
+  courseId      String
+  course        Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([courseId])
+}
+
+model Quiz {
+  id            String      @id @default(cuid())
+  title         String
+  description   String
+  courseId      String
+  course        Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions     Question[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([courseId])
+}
+
+model Question {
+  id            String      @id @default(cuid())
+  text          String
+  options       String[]
+  correctAnswer String
+  quizId        String
+  quiz          Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([quizId])
+}
+
+model Enrollment {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  progress      Float       @default(0)
+  isCompleted   Boolean     @default(false)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}

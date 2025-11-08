@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/common/ui/button";
 import { ThemeToggle } from "@/components/common/ui/theme-toggle";
 import { Menu, X, GraduationCap } from "lucide-react";
-import { NAV_LINKS } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/utils/constants";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -92,3 +92,4 @@ export default function Header() {
     </header>
   );
 }
+

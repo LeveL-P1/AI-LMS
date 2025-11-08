@@ -5,7 +5,7 @@ import { Button } from "@/components/common/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/common/ui/card";
 import { Badge } from "@/components/common/ui/badge";
 import { Check, Star, Zap } from "lucide-react";
-import { PRICING_PLANS } from "@/lib/constants";
+import { PRICING_PLANS } from "@/lib/utils/constants";
 import { formatPrice } from "@/lib/utils/utils";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
@@ -284,3 +284,4 @@ export default function Pricing() {
     </section>
   );
 }
+

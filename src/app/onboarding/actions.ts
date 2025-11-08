@@ -50,3 +50,4 @@ export async function updateUserRole(role: string) {
     throw error
   }
 }
+

@@ -56,3 +56,4 @@ export interface PricingPlan {
   buttonText: string;
   popular: boolean;
 }
+
