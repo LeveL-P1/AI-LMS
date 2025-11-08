@@ -1,9 +1,9 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { db } from '@/lib/prisma'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { db } from '@/lib/prisma/prisma'
+import { Button } from '@/components/common/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/ui/card'
 
 export default async function InstructorCoursesPage() {
   const { userId } = await auth()
@@ -49,3 +49,4 @@ export default async function InstructorCoursesPage() {
     </div>
   )
 }
+

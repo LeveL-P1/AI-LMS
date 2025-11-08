@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/common/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/common/ui/card";
 import { GraduationCap, BookOpen, Users, Settings, ArrowRight } from "lucide-react";
 
 const roles = [

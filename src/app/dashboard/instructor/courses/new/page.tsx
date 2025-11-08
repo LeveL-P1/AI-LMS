@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 import { revalidatePath } from 'next/cache'
 
 export default async function NewCoursePage() {
@@ -58,3 +58,4 @@ export default async function NewCoursePage() {
     </div>
   )
 }
+

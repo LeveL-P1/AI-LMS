@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/common/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/common/ui/card";
+import { Badge } from "@/components/common/ui/badge";
 import { Check, Star, Zap } from "lucide-react";
 import { PRICING_PLANS } from "@/lib/constants";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils/utils";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";

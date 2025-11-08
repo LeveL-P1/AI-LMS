@@ -4,8 +4,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Button } from "@/components/common/ui/button";
+import { ThemeToggle } from "@/components/common/ui/theme-toggle";
 import { Menu, X, GraduationCap } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
 

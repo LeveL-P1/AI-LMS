@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/common/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/common/ui/card'
 import { ShieldX, ArrowLeft } from 'lucide-react'
 
 export default function UnauthorizedPage() {
@@ -29,3 +29,4 @@ export default function UnauthorizedPage() {
     </div>
   )
 }
+

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { currentUser, clerkClient } from '@clerk/nextjs/server'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,3 +58,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+

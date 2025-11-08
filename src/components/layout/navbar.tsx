@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { UserButton } from "@clerk/nextjs"
 import { BookOpen, Home, Users, BarChart3, Settings } from "lucide-react"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { ThemeToggle } from "@/components/common/ui/theme-toggle"
 import { useUser } from "@/hooks/use-user"
 import { UserRole } from "@/types"
 

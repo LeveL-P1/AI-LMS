@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 
 type EventType = 'user.created' | 'user.updated' | '*'
 

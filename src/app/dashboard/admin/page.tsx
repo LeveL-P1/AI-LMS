@@ -1,8 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { db } from '@/lib/prisma'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { db } from '@/lib/prisma/prisma'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/ui/card'
+import { Button } from '@/components/common/ui/button'
 import { Users, BookOpen, GraduationCap, Settings, BarChart3, Shield } from 'lucide-react'
 
 export default async function AdminDashboard() {

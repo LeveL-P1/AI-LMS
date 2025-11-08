@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/common/ui/button";
 import { ArrowRight, Play, Sparkles, Users, BookOpen, Trophy } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";

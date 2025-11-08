@@ -1,7 +1,7 @@
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 import Link from 'next/link'
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/common/ui/card'
+import { Button } from '@/components/common/ui/button'
 
 export default async function CourseCatalogPage() {
   const courses = await db.course.findMany({
@@ -28,3 +28,4 @@ export default async function CourseCatalogPage() {
     </div>
   )
 }
+

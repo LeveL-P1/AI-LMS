@@ -11,7 +11,7 @@ import {
   Settings,
   PlusCircle,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/utils"
 import { UserRole } from "@/types"
 
 interface SidebarProps {
@@ -74,3 +74,4 @@ export function Sidebar({ userRole = UserRole.STUDENT}: SidebarProps) {
     </aside>
   )
 }
+
