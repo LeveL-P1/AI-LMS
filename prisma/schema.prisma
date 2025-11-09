@@ -1,5 +1,27 @@
-// Extended Prisma schema with permission system, analytics, and chat models
+// prisma/schema.prisma
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/**
+ * -------------------- RBAC --------------------
+ */
+
+// Roles as enum for simplicity
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+// Your original permission list (enum is fine for early-stage apps)
 enum Permission {
   CREATE_COURSE
   EDIT_COURSE
@@ -9,55 +31,126 @@ enum Permission {
   GRADE_ASSIGNMENT
   VIEW_ANALYTICS
   MANAGE_USERS
-  // Add more permissions as needed
 }
 
+/**
+ * Matrix mapping Role -> Permission using enums.
+ * Since both fields are enums (scalar), composite unique works directly.
+ */
 model RolePermission {
-  id          String      @id @default(cuid())
-  role        UserRole
-  permission  Permission
+  id         String     @id @default(cuid())
+  role       UserRole
+  permission Permission
 
-  @@unique([role, permission])
+  @@unique([role, permission], name: "role_permission_unique")
+  @@index([role], map: "idx_rolepermission_role")
+  @@index([permission], map: "idx_rolepermission_permission")
 }
+
+/**
+ * -------------------- Core LMS models --------------------
+ */
+
+model User {
+  id    String   @id @default(cuid())
+  email String   @unique
+  name  String?
+  role  UserRole @default(STUDENT)
+
+  // relations
+  enrollments  Enrollment[]
+  messagesSent ChatMessage[] @relation("MessagesSentByUser")
+  actions      UserAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  courses   Course[]
+
+  @@index([role], map: "idx_user_role")
+}
+
+model Course {
+  id           String  @id @default(cuid())
+  title        String
+  description  String?
+  instructorId String?
+  instructor   User?   @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+
+  // relations
+  enrollments Enrollment[]
+  chatRooms   ChatRoom[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([instructorId], map: "idx_course_instructorId")
+  @@index([title], map: "idx_course_title")
+}
+
+model Enrollment {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  status String @default("ACTIVE") // adjust to enum later if you want
+
+  createdAt DateTime @default(now())
+
+  // a user can enroll in a course only once
+  @@unique([userId, courseId], name: "unique_user_course")
+  @@index([courseId], map: "idx_enrollment_courseId")
+  @@index([userId], map: "idx_enrollment_userId")
+}
+
+/**
+ * -------------------- Analytics / User actions --------------------
+ */
 
 model UserAction {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  actionType  String
-  metadata    Json?
-  createdAt   DateTime    @default(now())
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actionType String
+  metadata   Json?
+  createdAt  DateTime @default(now())
 
-  @@index([userId])
-  @@index([actionType])
+  @@index([userId], map: "idx_useraction_userId")
+  @@index([actionType], map: "idx_useraction_actionType")
 }
 
-model ChatRoom {
-  id          String      @id @default(cuid())
-  courseId    String
-  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  messages    ChatMessage[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+/**
+ * -------------------- Chat --------------------
+ */
 
-  @@index([courseId])
+model ChatRoom {
+  id        String        @id @default(cuid())
+  courseId  String
+  course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  // If you want exactly ONE room per course, also add:
+  // @@unique([courseId], name: "unique_chatroom_per_course")
+
+  @@index([courseId], map: "idx_chatroom_courseId")
 }
 
 model ChatMessage {
-  id          String      @id @default(cuid())
-  chatRoomId  String
-  chatRoom    ChatRoom    @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-  senderId    String
-  sender      User        @relation(fields: [senderId], references: [id])
-  content     String
-  createdAt   DateTime    @default(now())
+  id String @id @default(cuid())
 
-  @@index([chatRoomId])
-  @@index([senderId])
+  chatRoomId String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation("MessagesSentByUser", fields: [senderId], references: [id], onDelete: Cascade)
+
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([chatRoomId], map: "idx_chatmessage_chatRoomId")
+  @@index([senderId], map: "idx_chatmessage_senderId")
 }
-
-// Retain existing models (User, Course, Lesson, Quiz, etc.) unchanged except for additions above
-
-/// Existing schema copied here for context
-
-// (All existing models are retained without changes except above additions)
