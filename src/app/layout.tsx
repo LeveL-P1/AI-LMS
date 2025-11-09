@@ -61,51 +61,7 @@ export default function RootLayout({
               }}
             />
 
-            {/* Temporary Auth Header - appears on top of your beautiful background */}
-            <div className="relative z-20 w-full border-b border-white/20 bg-white/10 backdrop-blur-sm">
-              <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-                <Link href="/" className="font-bold text-lg text-white drop-shadow-sm">
-                  SkillSyncAI ✨
-                </Link>
-
-                <div className="flex items-center gap-3">
-                  <SignedOut>
-                    <Link
-                      href="/sign-in"
-                      className="text-sm px-4 py-2 rounded-lg border border-white/30 text-white hover:bg-white/20 transition-all backdrop-blur-sm"
-                    >
-                      Sign in
-                    </Link>
-                    <Link
-                      href="/sign-up"
-                      className="text-sm px-4 py-2 rounded-lg bg-black/50 text-white hover:bg-black/70 transition-all backdrop-blur-sm border border-white/20"
-                    >
-                      Sign up
-                    </Link>
-                  </SignedOut>
-
-                  <SignedIn>
-                    <div className="flex items-center gap-2">
-                      <Link 
-                        href="/dashboard" 
-                        className="text-sm px-3 py-1.5 rounded-md text-white/90 hover:text-white hover:bg-white/10 transition-all"
-                      >
-                        Dashboard
-                      </Link>
-                      {/* UserButton includes Sign out in its dropdown */}
-                      <UserButton
-                        appearance={{
-                          elements: { 
-                            userButtonAvatarBox: 'w-8 h-8 ring-2 ring-white/20',
-                            userButtonPopoverCard: 'backdrop-blur-sm bg-white/95'
-                          },
-                        }}
-                      />
-                    </div>
-                  </SignedIn>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Content */}
             <div className="relative z-10 font-sans">
