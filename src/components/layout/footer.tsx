@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, Twitter, Github, Linkedin, Mail } from "lucide-react";
-
+import { GraduationCap, Twitter, Github, Linkedin, Mail } from "lucide-react";  
 export default function Footer() {
   return (
     <footer className="border-t bg-muted/30">
@@ -12,7 +11,7 @@ export default function Footer() {
               <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
                 <GraduationCap className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <span className="font-bold text-xl bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 SkillSyncAI
                 
               </span>

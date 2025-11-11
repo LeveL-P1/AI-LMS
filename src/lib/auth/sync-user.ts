@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/lib/prisma/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-import { UserRole } from "@/types"
+import { UserRole } from "@/types";
+import type { Prisma } from "@prisma/client";
 
 export async function syncUser() {
   const user = await currentUser();
@@ -11,39 +10,27 @@ export async function syncUser() {
 
   console.log("🔄 Syncing user:", user.id);
 
-  // Get role from public metadata, default to STUDENT
   const role = (user.publicMetadata?.role as UserRole) || UserRole.STUDENT;
 
-  // Check if user exists in database
   const existingUser = await db.user.findUnique({
     where: { clerkId: user.id },
   });
 
-  // If user doesn't exist, create them
+  const userData: Prisma.UserCreateInput = {
+    clerkId: user.id,
+    email: user.emailAddresses[0].emailAddress,
+    firstName: user.firstName || null,
+    lastName: user.lastName || null,
+    imageUrl: user.imageUrl || null,
+    userRole: UserRole,
+    };
+
   if (!existingUser) {
-    return await db.user.create({
-      data: {
-        clerkId: user.id,
-        email: user.emailAddresses[0].emailAddress,
-        firstName: user.firstName || null,
-        lastName: user.lastName || null,
-        imageUrl: user.imageUrl || null,
-        role: (user.publicMetadata?.role as any) || "STUDENT",
-      },
-    });
+    return await db.user.create({ data: userData });
   }
 
-  // Update existing user
   return await db.user.update({
     where: { clerkId: user.id },
-    data: {
-      email: user.emailAddresses[0].emailAddress,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
-      imageUrl: user.imageUrl || null,
-      role: (user.publicMetadata?.role as any) || "STUDENT",
-    },
+    data: userData,
   });
 }
-
-

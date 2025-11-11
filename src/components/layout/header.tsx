@@ -15,14 +15,14 @@ export default function Header() {
   return (
     // <header className="sticky top-2 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]
     // :bg-background/60">
-    <header className="sticky top-8 z-50 mx-auto max-w-6xl w-full bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 flex justify-center items-center overflow-hidden rounded-2xl border-b-2 border-solid border-border shadow-sm">
+    <header className="sticky top-8 z-50 mx-auto max-w-6xl w-full bg-background/90 backdrop-blur-lg supports-backdrop-filter:bg-background/60 flex justify-center items-center overflow-hidden rounded-2xl border-b-2 border-solid border-border shadow-sm">
       <div className="flex h-16 items-center w-full px-4">
         {/* Logo */}
         <div className=" mr-6 ml-4 flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
             <GraduationCap className="h-5 w-5  text-primary-foreground " />
           </div>
-          <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+          <span className="font-bold text-xl bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             SkillSyncAI
           </span>
         </div>

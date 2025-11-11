@@ -53,7 +53,11 @@ model RolePermission {
 
 model User {
   id    String   @id @default(cuid())
+  clerkId String @unique
   email String   @unique
+  firstName String?
+  lastName String?
+  imageUrl String?
   name  String?
   role  UserRole @default(STUDENT)
 
@@ -61,30 +65,42 @@ model User {
   enrollments  Enrollment[]
   messagesSent ChatMessage[] @relation("MessagesSentByUser")
   actions      UserAction[]
+  instructorCourses Course[] @relation("InstructorCourses")
+  quizAttempts QuizAttempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  courses   Course[]
 
   @@index([role], map: "idx_user_role")
+  @@index([clerkId], map: "idx_user_clerkId")
 }
 
 model Course {
   id           String  @id @default(cuid())
   title        String
   description  String?
+  thumbnail    String?
   instructorId String?
-  instructor   User?   @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  instructor   User?   @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: SetNull)
+  duration     Int? // in minutes
+  level        String @default("beginner") // "beginner" | "intermediate" | "advanced"
+  price        Float @default(0)
+  isPublished  Boolean @default(false)
+  enrollmentCount Int @default(0)
+  rating       Float @default(0)
 
   // relations
   enrollments Enrollment[]
   chatRooms   ChatRoom[]
+  chapters    Chapter[]
+  quizzes     Quiz[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([instructorId], map: "idx_course_instructorId")
   @@index([title], map: "idx_course_title")
+  @@index([isPublished], map: "idx_course_isPublished")
 }
 
 model Enrollment {
@@ -120,6 +136,73 @@ model UserAction {
 
   @@index([userId], map: "idx_useraction_userId")
   @@index([actionType], map: "idx_useraction_actionType")
+}
+
+/**
+ * -------------------- Course Content: Chapters, Lessons & Quizzes --------------------
+ */
+
+model Chapter {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  position    Int      @default(0)
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId], map: "idx_chapter_courseId")
+}
+
+model Quiz {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  isPublished  Boolean  @default(false)
+  passingScore Float    @default(70)
+  
+  questions    QuizQuestion[]
+  attempts     QuizAttempt[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId], map: "idx_quiz_courseId")
+  @@index([isPublished], map: "idx_quiz_isPublished")
+}
+
+model QuizQuestion {
+  id           String   @id @default(cuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  question     String
+  options      String[] // JSON array stored as text
+  correctAnswer String
+  explanation  String?
+  position     Int      @default(0)
+  
+  createdAt DateTime @default(now())
+
+  @@index([quizId], map: "idx_quizquestion_quizId")
+}
+
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score        Float
+  answers      Json
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId], map: "idx_quizattempt_userId")
+  @@index([quizId], map: "idx_quizattempt_quizId")
 }
 
 /**
