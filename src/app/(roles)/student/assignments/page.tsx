@@ -1,20 +1,10 @@
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { db } from '@/lib/prisma/prisma'
-import Link from 'next/link'
+import React from 'react'
 
-export default async function StudentAssignmentsPage() {
-	const { userId } = await auth()
-	if (!userId) redirect('/sign-in')
-
-	const student = await db.user.findUnique({ where: { clerkId: userId } })
-	if (!student) redirect('/onboarding')
-
-	const submissions = await db.assignmentSubmission.findMany({
-		where: { userId: student.id },
-		include: { assignment: true },
-		orderBy: { submittedAt: 'desc' }
-	})
+export default function StudentAssignmentsPage() {
+	const submissions = [
+		{ id: 's1', title: 'Build a React Todo App', submittedAt: '2025-11-05T12:34:00Z', status: 'Graded', grade: 92, feedback: 'Great job!' , fileUrl: '#'},
+		{ id: 's2', title: 'Next.js Blog Project', submittedAt: '2025-10-28T09:00:00Z', status: 'Pending', grade: null, feedback: null, fileUrl: null },
+	]
 
 	return (
 		<div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -24,9 +14,9 @@ export default async function StudentAssignmentsPage() {
 			)}
 
 			<ul className="space-y-3">
-				{submissions.map(s => (
+				{submissions.map((s) => (
 					<li key={s.id} className="border rounded p-4">
-						<div className="font-medium">{s.assignment?.title || 'Assignment'}</div>
+						<div className="font-medium">{s.title}</div>
 						<div className="text-sm text-muted-foreground">Submitted: {new Date(s.submittedAt).toLocaleString()}</div>
 						<div className="mt-2">Status: {s.status}</div>
 						{s.grade != null && <div>Grade: {s.grade}</div>}
