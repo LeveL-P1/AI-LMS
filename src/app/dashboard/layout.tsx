@@ -11,7 +11,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, role } = useUser();
 
   // Wait for user to load
   if (!isLoaded) {
@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      <Sidebar userRole={role} />
       <div className="flex-1 overflow-auto">
         <Navbar />
         <main className="flex-1">

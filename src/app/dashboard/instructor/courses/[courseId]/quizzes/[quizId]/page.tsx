@@ -1,10 +1,10 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 import { revalidatePath } from 'next/cache'
 
-export default async function QuizQuestionsPage(props: any) {
-  const { params } = props as { params: { courseId: string; quizId: string } }
+export default async function QuizQuestionsPage(props: { params: { courseId: string; quizId: string } }) {
+  const { params } = props
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
@@ -31,7 +31,7 @@ export default async function QuizQuestionsPage(props: any) {
     await db.quizQuestion.create({
       data: {
         question,
-        options: options as unknown as object,
+        options,
         correctAnswer,
         explanation,
         quizId: quizId

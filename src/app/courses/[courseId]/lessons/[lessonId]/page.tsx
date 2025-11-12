@@ -1,8 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/common/ui/button'
 
 export default async function LessonViewPage(props: any) {
   const { params } = props as { params: { courseId: string; lessonId: string } }

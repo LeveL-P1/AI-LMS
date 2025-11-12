@@ -1,12 +1,12 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/common/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/ui/card'
 
-export default async function ManageCoursePage(props: any) {
-  const { params } = props as { params: { courseId: string } }
+export default async function ManageCoursePage(props: { params: { courseId: string } }) {
+  const { params } = props
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
@@ -25,7 +25,6 @@ export default async function ManageCoursePage(props: any) {
     'use server'
     const title = String(formData.get('title') || '')
     const description = String(formData.get('description') || '')
-    const videoUrl = String(formData.get('videoUrl') || '')
 
     if (title.trim().length === 0 || title.length > 100) {
       throw new Error('Lesson title required and must be under 100 chars')
@@ -35,20 +34,14 @@ export default async function ManageCoursePage(props: any) {
       throw new Error('Lesson description must be under 1000 chars')
     }
 
-    if (videoUrl && !videoUrl.startsWith('http')) {
-      throw new Error('Video URL must be valid')
-    }
-
-  const position = chapters.length > 0 ? chapters[chapters.length - 1].position + 1 : 1
+    const position = chapters.length > 0 ? chapters[chapters.length - 1].position + 1 : 1
 
     await db.chapter.create({
       data: {
         title,
         description,
-        videoUrl,
         position,
-    courseId: courseId,
-        isPublished: false,
+        courseId: courseId,
       },
     })
 
@@ -106,11 +99,6 @@ export default async function ManageCoursePage(props: any) {
               <li key={chapter.id} className="border rounded-md p-3">
                 <div className="font-medium">{chapter.title}</div>
                 <div className="text-sm text-muted-foreground">{chapter.description}</div>
-                {chapter.videoUrl && (
-                  <a href={chapter.videoUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                    Watch video
-                  </a>
-                )}
               </li>
             ))}
           </ul>
@@ -123,10 +111,6 @@ export default async function ManageCoursePage(props: any) {
             <div>
               <label className="block text-sm mb-1">Description</label>
               <textarea name="description" maxLength={1000} className="w-full border rounded px-3 py-2" />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Video URL (optional)</label>
-              <input name="videoUrl" className="w-full border rounded px-3 py-2" placeholder="https://youtube.com/..." />
             </div>
             <button className="px-4 py-2 rounded bg-black text-white" type="submit">Add Lesson</button>
           </form>

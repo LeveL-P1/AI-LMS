@@ -8,8 +8,16 @@ import { UserRole } from "@/types";
 export function useUser() {
   const { user, isLoaded, isSignedIn } = useClerkUser();
 
-  // Get role from public metadata
-  const role = (user?.publicMetadata?.role as UserRole) || UserRole.STUDENT;
+  // Get role from public metadata and normalize to enum
+  // Clerk stores role as lowercase string (e.g., "admin", "instructor", "student")
+  const roleString = (user?.publicMetadata?.role as string) || "student";
+  const normalizedRoleString = roleString.toUpperCase();
+  
+  // Ensure it's a valid UserRole enum value
+  const validRoles = Object.values(UserRole);
+  const role = (validRoles.includes(normalizedRoleString as UserRole) 
+    ? normalizedRoleString as UserRole 
+    : UserRole.STUDENT);
 
   return {
     user,
