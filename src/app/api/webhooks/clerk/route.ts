@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import { db } from '@/lib/prisma/prisma'
 
+
 type EventType = 'user.created' | 'user.updated' | '*'
 
 type Event = {
