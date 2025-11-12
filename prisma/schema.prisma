@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,18 +8,96 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-/**
- * -------------------- RBAC --------------------
- */
+model ChatMessage {
+  id         String   @id
+  chatRoomId String
+  senderId   String
+  content    String
+  createdAt  DateTime @default(now())
+  ChatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  User       User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
-// Roles as enum for simplicity
-enum UserRole {
-  ADMIN
-  INSTRUCTOR
-  STUDENT
+  @@index([chatRoomId], map: "idx_chatmessage_chatRoomId")
+  @@index([senderId], map: "idx_chatmessage_senderId")
 }
 
-// Your original permission list (enum is fine for early-stage apps)
+model ChatRoom {
+  id          String        @id
+  courseId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  ChatMessage ChatMessage[]
+  Course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId], map: "idx_chatroom_courseId")
+}
+
+model Course {
+  id           String       @id
+  title        String
+  description  String?
+  instructorId String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime
+  ChatRoom     ChatRoom[]
+  User         User?        @relation(fields: [instructorId], references: [id])
+  Enrollment   Enrollment[]
+
+  @@index([instructorId], map: "idx_course_instructorId")
+  @@index([title], map: "idx_course_title")
+}
+
+model Enrollment {
+  id        String   @id
+  userId    String
+  courseId  String
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  Course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId], map: "idx_enrollment_courseId")
+  @@index([userId], map: "idx_enrollment_userId")
+}
+
+model RolePermission {
+  id         String     @id
+  role       UserRole
+  permission Permission
+
+  @@unique([role, permission])
+  @@index([permission], map: "idx_rolepermission_permission")
+  @@index([role], map: "idx_rolepermission_role")
+}
+
+model User {
+  id          String        @id @default(cuid())
+  email       String        @unique
+  name        String?
+  role        UserRole      @default(STUDENT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  ChatMessage ChatMessage[]
+  Course      Course[]
+  Enrollment  Enrollment[]
+  UserAction  UserAction[]
+
+  @@index([role], map: "idx_user_role")
+}
+
+model UserAction {
+  id         String   @id
+  userId     String
+  actionType String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([actionType], map: "idx_useraction_actionType")
+  @@index([userId], map: "idx_useraction_userId")
+}
+
 enum Permission {
   CREATE_COURSE
   EDIT_COURSE
@@ -33,207 +109,8 @@ enum Permission {
   MANAGE_USERS
 }
 
-/**
- * Matrix mapping Role -> Permission using enums.
- * Since both fields are enums (scalar), composite unique works directly.
- */
-model RolePermission {
-  id         String     @id @default(cuid())
-  role       UserRole
-  permission Permission
-
-  @@unique([role, permission], name: "role_permission_unique")
-  @@index([role], map: "idx_rolepermission_role")
-  @@index([permission], map: "idx_rolepermission_permission")
-}
-
-/**
- * -------------------- Core LMS models --------------------
- */
-
-model User {
-  id    String   @id @default(cuid())
-  clerkId String @unique
-  email String   @unique
-  firstName String?
-  lastName String?
-  imageUrl String?
-  name  String?
-  role  UserRole @default(STUDENT)
-
-  // relations
-  enrollments  Enrollment[]
-  messagesSent ChatMessage[] @relation("MessagesSentByUser")
-  actions      UserAction[]
-  instructorCourses Course[] @relation("InstructorCourses")
-  quizAttempts QuizAttempt[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([role], map: "idx_user_role")
-  @@index([clerkId], map: "idx_user_clerkId")
-}
-
-model Course {
-  id           String  @id @default(cuid())
-  title        String
-  description  String?
-  thumbnail    String?
-  instructorId String?
-  instructor   User?   @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: SetNull)
-  duration     Int? // in minutes
-  level        String @default("beginner") // "beginner" | "intermediate" | "advanced"
-  price        Float @default(0)
-  isPublished  Boolean @default(false)
-  enrollmentCount Int @default(0)
-  rating       Float @default(0)
-
-  // relations
-  enrollments Enrollment[]
-  chatRooms   ChatRoom[]
-  chapters    Chapter[]
-  quizzes     Quiz[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([instructorId], map: "idx_course_instructorId")
-  @@index([title], map: "idx_course_title")
-  @@index([isPublished], map: "idx_course_isPublished")
-}
-
-model Enrollment {
-  id String @id @default(cuid())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  status String @default("ACTIVE") // adjust to enum later if you want
-
-  createdAt DateTime @default(now())
-
-  // a user can enroll in a course only once
-  @@unique([userId, courseId], name: "unique_user_course")
-  @@index([courseId], map: "idx_enrollment_courseId")
-  @@index([userId], map: "idx_enrollment_userId")
-}
-
-/**
- * -------------------- Analytics / User actions --------------------
- */
-
-model UserAction {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  actionType String
-  metadata   Json?
-  createdAt  DateTime @default(now())
-
-  @@index([userId], map: "idx_useraction_userId")
-  @@index([actionType], map: "idx_useraction_actionType")
-}
-
-/**
- * -------------------- Course Content: Chapters, Lessons & Quizzes --------------------
- */
-
-model Chapter {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  position    Int      @default(0)
-  courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([courseId], map: "idx_chapter_courseId")
-}
-
-model Quiz {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?
-  courseId     String
-  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  isPublished  Boolean  @default(false)
-  passingScore Float    @default(70)
-  
-  questions    QuizQuestion[]
-  attempts     QuizAttempt[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([courseId], map: "idx_quiz_courseId")
-  @@index([isPublished], map: "idx_quiz_isPublished")
-}
-
-model QuizQuestion {
-  id           String   @id @default(cuid())
-  quizId       String
-  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  question     String
-  options      String[] // JSON array stored as text
-  correctAnswer String
-  explanation  String?
-  position     Int      @default(0)
-  
-  createdAt DateTime @default(now())
-
-  @@index([quizId], map: "idx_quizquestion_quizId")
-}
-
-model QuizAttempt {
-  id           String   @id @default(cuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quizId       String
-  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  score        Float
-  answers      Json
-  
-  createdAt DateTime @default(now())
-
-  @@index([userId], map: "idx_quizattempt_userId")
-  @@index([quizId], map: "idx_quizattempt_quizId")
-}
-
-/**
- * -------------------- Chat --------------------
- */
-
-model ChatRoom {
-  id        String        @id @default(cuid())
-  courseId  String
-  course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  messages  ChatMessage[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  // If you want exactly ONE room per course, also add:
-  // @@unique([courseId], name: "unique_chatroom_per_course")
-
-  @@index([courseId], map: "idx_chatroom_courseId")
-}
-
-model ChatMessage {
-  id String @id @default(cuid())
-
-  chatRoomId String
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-
-  senderId String
-  sender   User   @relation("MessagesSentByUser", fields: [senderId], references: [id], onDelete: Cascade)
-
-  content   String
-  createdAt DateTime @default(now())
-
-  @@index([chatRoomId], map: "idx_chatmessage_chatRoomId")
-  @@index([senderId], map: "idx_chatmessage_senderId")
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
 }

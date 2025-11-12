@@ -17,25 +17,16 @@ export async function syncUser() {
     ? normalizedRole as UserRole 
     : "STUDENT");
 
-  const existingUser = await db.user.findUnique({
-    where: { clerkId: user.id },
-  });
-
-  const userData: Prisma.UserCreateInput = {
-    clerkId: user.id,
-    email: user.emailAddresses[0].emailAddress,
-    firstName: user.firstName || null,
-    lastName: user.lastName || null,
-    imageUrl: user.imageUrl || null,
+const userData: Prisma.UserCreateInput = {
+    email: user.emailAddresses[0]?.emailAddress || "",
+    name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
     role,
   };
 
-  if (!existingUser) {
-    return await db.user.create({ data: userData });
-  }
-
-  return await db.user.update({
-    where: { clerkId: user.id },
-    data: userData,
+  // Use upsert to handle both create and update cases
+  return await db.user.upsert({
+    where: { email: user.emailAddresses[0]?.emailAddress || "" },
+    update: userData,
+    create: userData,
   });
 }

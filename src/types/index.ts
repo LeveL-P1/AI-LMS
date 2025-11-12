@@ -21,9 +21,9 @@ export interface Course {
   title: string;
   description: string;
   thumbnail?: string;
-  instructorId: string;
-  instructor: User;
-  duration: number; // in minutes
+  instructorId?: string;
+  instructor?: User;
+  duration?: number; // in minutes
   level: "beginner" | "intermediate" | "advanced";
   price: number;
   isPublished: boolean;
