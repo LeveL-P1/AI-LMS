@@ -52,7 +52,14 @@ export const logger = {
     console.warn(`[WARN] ${new Date().toISOString()} - ${message}`, data || '');
   },
   error: (message: string, error?: unknown) => {
-    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, error || '');
+    const isDev = process.env.NODE_ENV === 'development';
+    if (isDev) {
+      console.error(`[ERROR] ${new Date().toISOString()} - ${message}`);
+      console.error(error || '');
+    } else {
+      const safe = error instanceof Error ? { message: error.message, name: error.name } : undefined;
+      console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, safe || '');
+    }
   },
   debug: (message: string, data?: unknown) => {
     if (process.env.NODE_ENV === 'development') {
