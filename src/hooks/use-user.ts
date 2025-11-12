@@ -19,21 +19,12 @@ export function useUser() {
     ? normalizedRoleString as UserRole 
     : UserRole.STUDENT);
 
-  return {
-    user,
-    isLoaded,
-    isSignedIn,
-    role,
-    isStudent: role === UserRole.STUDENT,
-    isInstructor: role === UserRole.INSTRUCTOR,
-    isAdmin: role === UserRole.ADMIN,
-    // Convenient user data access
-    firstName: user?.firstName,
-    lastName: user?.lastName,
-    fullName: user?.fullName,
-    email: user?.emailAddresses?.[0]?.emailAddress,
+return {
+    id: user?.id,
+    email: user?.emailAddresses[0]?.emailAddress,
+    name: user?.fullName,
+    role: user?.publicMetadata?.role,
     imageUrl: user?.imageUrl,
-    clerkId: user?.id,
   };
 }
 

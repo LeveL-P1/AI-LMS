@@ -87,22 +87,15 @@ export async function POST(req: NextRequest) {
 
       // Upsert user in database
       await db.user.upsert({
-        where: {
-          clerkId: data.id,
+where: {
+          email: email,
         },
-        update: {
-          email,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          imageUrl: data.image_url,
-          role: role.toUpperCase() as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
+update: {
+          name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
         },
         create: {
-          clerkId: data.id,
           email,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          imageUrl: data.image_url,
+          name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
           role: role.toUpperCase() as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
         },
       })

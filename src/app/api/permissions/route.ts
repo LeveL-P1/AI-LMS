@@ -16,12 +16,10 @@ export async function GET() {
       return fail({ code: 'UNAUTHORIZED', message: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user from database by clerkId (when schema is updated)
-    // For now, we'll search by any available field
-    // Prefer matching by clerkId; ensure prisma schema has a unique index on clerkId
+// Get user from database by email
     const user = await db.user.findFirst({
-      where: { 
-        clerkId: userId,
+      where: {
+        email: userId,
       },
     });
 

@@ -31,8 +31,8 @@ export async function updateUserRole(role: string) {
 
     // Update user role in our database
     await db.user.update({
-      where: {
-        clerkId: userId
+where: {
+        email: userId
       },
       data: {
         role: upperRole as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN'

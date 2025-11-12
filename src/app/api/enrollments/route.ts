@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
 		const { courseId } = await req.json()
 		if (!courseId) return NextResponse.json({ error: 'Missing courseId' }, { status: 400 })
 
-		// Find local user
-		const student = await db.user.findUnique({ where: { clerkId: user.id } })
+// Find local user
+		const student = await db.user.findUnique({ where: { email: user.emailAddresses[0]?.emailAddress } })
 		if (!student) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
 		const enrollment = await db.enrollment.upsert({

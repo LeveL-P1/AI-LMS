@@ -10,7 +10,7 @@ export async function requireAdmin() {
       return { ok: false as const, response: NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 }) }
     }
 
-    const user = await db.user.findFirst({ where: { clerkId: userId } })
+    const user = await db.user.findFirst({ where: { email: userId } })
     if (!user || user.role !== 'ADMIN') {
       return { ok: false as const, response: NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Admin access required' } }, { status: 403 }) }
     }
