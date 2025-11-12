@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { ok, fail } from '@/lib/utils/api'
 
 /**
  * POST /api/admin/courses/delete
@@ -8,25 +10,30 @@ import { db } from '@/lib/prisma/prisma'
  */
 export async function POST(request: NextRequest) {
 	try {
-		const { userId } = await auth()
+		const adminCheck = await requireAdmin()
+		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		const userId = adminCheck.ok ? adminCheck.user.id : undefined
 
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		// Content-Type guard
+		const contentType = request.headers.get('content-type') || ''
+		if (!contentType.includes('application/json')) {
+			return fail({ code: 'UNSUPPORTED_MEDIA_TYPE', message: 'Unsupported content type' }, { status: 415 })
 		}
 
-		// Verify admin role
-		const admin = await db.user.findUnique({
-			where: { id: userId }
-		})
-
-		if (admin?.role !== 'ADMIN') {
-			return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
+		let parsed: unknown
+		try {
+			parsed = await request.json()
+		} catch {
+			return fail({ code: 'BAD_REQUEST', message: 'Invalid JSON body' }, { status: 400 })
 		}
 
-		const { courseId } = await request.json()
+		const { courseId } = (parsed as { courseId?: unknown })
+		if (typeof courseId !== 'string' || courseId.trim().length === 0) {
+			return fail({ code: 'BAD_REQUEST', message: 'courseId must be a non-empty string' }, { status: 400 })
+		}
 
 		if (!courseId) {
-			return NextResponse.json({ error: 'courseId is required' }, { status: 400 })
+			return fail({ code: 'BAD_REQUEST', message: 'courseId is required' }, { status: 400 })
 		}
 
 		// Verify course exists
@@ -36,7 +43,7 @@ export async function POST(request: NextRequest) {
 		})
 
 		if (!course) {
-			return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+			return fail({ code: 'NOT_FOUND', message: 'Course not found' }, { status: 404 })
 		}
 
 		// Log admin action before deletion
@@ -57,12 +64,11 @@ export async function POST(request: NextRequest) {
 			where: { id: courseId }
 		})
 
-		return NextResponse.json({
-			success: true,
+		return ok({
 			message: `Course "${course.title}" deleted (${course._count.enrollments} enrollments removed)`
 		})
 	} catch (error) {
 		console.error('Delete course error:', error)
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+		return fail({ code: 'SERVER_ERROR', message: 'Internal server error' }, { status: 500 })
 	}
 }

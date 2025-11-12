@@ -1,6 +1,8 @@
-import { auth } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { ok, fail } from '@/lib/utils/api'
+import { isRateLimited, rateLimitConfigs } from '@/lib/utils/rateLimit'
+import { logger } from '@/lib/errors'
 
 /**
  * GET /api/admin/stats
@@ -8,19 +10,14 @@ import { db } from '@/lib/prisma/prisma'
  */
 export async function GET() {
 	try {
-		const { userId } = await auth()
+		const adminCheck = await requireAdmin()
+		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
 
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-		}
+		const userId = adminCheck.user.id
 
-		// Verify admin role
-		const user = await db.user.findUnique({
-			where: { id: userId }
-		})
-
-		if (user?.role !== 'ADMIN') {
-			return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
+		// Rate limiting for stats queries (general limit, not sensitive)
+		if (isRateLimited(`admin:stats:${userId}`, rateLimitConfigs.adminGeneral.limit, rateLimitConfigs.adminGeneral.windowMs)) {
+			return fail({ code: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' }, { status: 429 })
 		}
 
 		// Fetch platform statistics
@@ -38,7 +35,9 @@ export async function GET() {
 				db.user.count({ where: { role: 'STUDENT' } })
 			])
 
-		return NextResponse.json({
+		logger.info('Admin stats fetched', { adminId: userId })
+
+		return ok({
 			totalUsers,
 			totalInstructors: instructors,
 			totalStudents: students,
@@ -53,7 +52,7 @@ export async function GET() {
 			}))
 		})
 	} catch (error) {
-		console.error('Admin stats error:', error)
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+		logger.error('Admin stats error', error)
+		return fail({ code: 'SERVER_ERROR', message: 'Internal server error' }, { status: 500 })
 	}
 }

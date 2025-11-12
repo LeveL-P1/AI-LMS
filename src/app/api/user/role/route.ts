@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 import { clerkClient } from '@clerk/nextjs/server'
 import { db } from '@/lib/prisma/prisma'
+import { syncUser } from '@/lib/auth/sync-user'
 import type { UserRole } from '@prisma/client'
 
 
@@ -21,17 +22,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
-    const existingUser = await db.user.findUnique({
-      where: { clerkId: user.id },
+// Ensure user exists in database by syncing from Clerk
+    let dbUser = await db.user.findUnique({
+      where: { email: user.emailAddresses[0]?.emailAddress },
     })
 
-    if (!existingUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    if (!dbUser) {
+      // Sync user from Clerk to database
+      dbUser = await syncUser()
+      
+      if (!dbUser) {
+        return NextResponse.json({ error: 'Failed to sync user' }, { status: 500 })
+      }
     }
 
     // Update Prisma database with normalized uppercase role
     const updatedUser = await db.user.update({
-      where: { clerkId: user.id },
+      where: { email: user.emailAddresses[0]?.emailAddress },
       data: { role: normalizedRole as UserRole },
     })
 

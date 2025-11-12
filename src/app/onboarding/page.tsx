@@ -61,7 +61,7 @@ export default function OnboardingPage() {
   const { user } = useUser();
   const router = useRouter();
 
-  const handleRoleSelection = async () => {
+const handleRoleSelection = async () => {
     if (!selectedRole || !user) return;
     
     setLoading(true);
@@ -85,8 +85,10 @@ export default function OnboardingPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to update user role');
+        throw new Error(data.error || 'Failed to update user role');
       }
 
       // Redirect based on role
@@ -97,6 +99,7 @@ export default function OnboardingPage() {
       router.push(redirectPath);
     } catch (error) {
       console.error("Error updating user role:", error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
       setLoading(false);
     }
   };

@@ -20,7 +20,7 @@ export default async function CourseCatalogPage() {
         {courses.map(c => (
           <Link key={c.id} href={`/courses/${c.id}`} className="hover:bg-accent border rounded-md p-4 block">
             <div className="font-medium text-lg">{c.title}</div>
-            <div className="text-sm text-muted-foreground mb-2">By {c.instructor?.firstName} {c.instructor?.lastName}</div>
+            <div className="text-sm text-muted-foreground mb-2">By {c.instructor ? `${c.instructor.firstName || ''} ${c.instructor.lastName || ''}`.trim() || 'Unknown' : 'Unknown'}</div>
             <div className="text-xs text-muted-foreground">{c.description}</div>
           </Link>
         ))}

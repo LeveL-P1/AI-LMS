@@ -1,16 +1,26 @@
-import { NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
+import { ok, fail } from '@/lib/utils/api'
+import { logger } from '@/lib/errors'
 
 export async function GET() {
 	try {
 		const courses = await db.course.findMany({
 			where: { isPublished: true },
-			select: { id: true, title: true, description: true, imageUrl: true, price: true, categoryId: true }
+			select: { 
+				id: true, 
+				title: true, 
+				description: true, 
+				thumbnail: true,
+				price: true, 
+				createdAt: true,
+				updatedAt: true
+			}
 		})
-		return NextResponse.json({ courses })
+		logger.info('Courses fetched', { count: courses.length })
+		return ok(courses)
 	} catch (error) {
-		console.error('Error fetching courses:', error)
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+		logger.error('Error fetching courses', error)
+		return fail({ code: 'SERVER_ERROR', message: 'Internal server error' }, { status: 500 })
 	}
 }
 

@@ -27,7 +27,7 @@ export default async function StudentCoursesPage() {
 
 	const actions = await db.userAction.findMany({ where: { userId: student.id } })
 
-	const enrolled: Enrolled[] = enrollments.map((e) => {
+const enrolled: Enrolled[] = enrollments.map((e) => {
 		const course = e.course
 		// derive a crude progress metric from user actions that reference this course
 		const seen = actions.filter((a) => ((a.metadata as Record<string, any>)?.courseId as string) === course.id).length
@@ -35,7 +35,7 @@ export default async function StudentCoursesPage() {
 		return {
 			id: course.id,
 			title: course.title,
-			instructorName: course.instructor?.name ?? null,
+			instructorName: course.instructor ? `${course.instructor.firstName || ''} ${course.instructor.lastName || ''}`.trim() || null : null,
 			progress,
 		}
 	})

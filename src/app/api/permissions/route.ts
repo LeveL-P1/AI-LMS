@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/prisma/prisma';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/errors';
+import { ok, fail } from '@/lib/utils/api';
 
 /**
  * GET /api/permissions
@@ -12,18 +13,15 @@ export async function GET() {
     const { userId } = await auth();
     
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return fail({ code: 'UNAUTHORIZED', message: 'Unauthorized' }, { status: 401 });
     }
 
     // Get user from database by clerkId (when schema is updated)
     // For now, we'll search by any available field
+    // Prefer matching by clerkId; ensure prisma schema has a unique index on clerkId
     const user = await db.user.findFirst({
       where: { 
-        // Once Prisma is regenerated, use: clerkId: userId
-        // For temporary compatibility:
-        OR: [
-          { id: userId }
-        ]
+        clerkId: userId,
       },
     });
 
@@ -35,7 +33,7 @@ export async function GET() {
         select: { permission: true },
       });
       const permissions = rolePermissions.map(rp => rp.permission);
-      return NextResponse.json(permissions);
+      return ok(permissions);
     }
 
     // Get permissions for user's role
@@ -46,12 +44,9 @@ export async function GET() {
 
     const permissions = rolePermissions.map(rp => rp.permission);
     logger.info('Permissions retrieved', { userId, role: user.role, permissionCount: permissions.length });
-    return NextResponse.json(permissions);
+    return ok(permissions);
   } catch (error) {
     logger.error('Failed to fetch permissions', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch permissions' },
-      { status: 500 }
-    );
+    return fail({ code: 'SERVER_ERROR', message: 'Failed to fetch permissions' }, { status: 500 });
   }
 }

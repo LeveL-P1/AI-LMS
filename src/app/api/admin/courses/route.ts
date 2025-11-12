@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { ok, fail } from '@/lib/utils/api'
 
 /**
  * GET /api/admin/courses
@@ -8,20 +10,8 @@ import { db } from '@/lib/prisma/prisma'
  */
 export async function GET() {
 	try {
-		const { userId } = await auth()
-
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-		}
-
-		// Verify admin role
-		const user = await db.user.findUnique({
-			where: { id: userId }
-		})
-
-		if (user?.role !== 'ADMIN') {
-			return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
-		}
+		const adminCheck = await requireAdmin()
+		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
 
 		// Fetch all courses with instructor and enrollment info
 		const courses = await db.course.findMany({
@@ -31,7 +21,7 @@ export async function GET() {
 				description: true,
 				instructorId: true,
 				instructor: {
-					select: { name: true, email: true }
+					select: { firstName: true, lastName: true, email: true }
 				},
 				_count: {
 					select: { enrollments: true }
@@ -41,20 +31,20 @@ export async function GET() {
 			orderBy: { createdAt: 'desc' }
 		})
 
-		return NextResponse.json(
+		return ok(
 			courses.map((c) => ({
 				id: c.id,
 				title: c.title,
 				description: c.description,
 				instructorId: c.instructorId,
-				instructorName: c.instructor?.name || 'Unassigned',
+				instructorName: c.instructor ? `${c.instructor.firstName || ''} ${c.instructor.lastName || ''}`.trim() || 'Unassigned' : 'Unassigned',
 				enrollmentCount: c._count.enrollments,
-				status: 'ACTIVE', // TODO: Add status field to Course model
+				// status removed until supported in schema
 				createdAt: c.createdAt
 			}))
 		)
 	} catch (error) {
 		console.error('Fetch courses error:', error)
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+		return fail({ code: 'SERVER_ERROR', message: 'Internal server error' }, { status: 500 })
 	}
 }

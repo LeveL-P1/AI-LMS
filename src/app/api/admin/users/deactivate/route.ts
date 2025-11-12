@@ -1,33 +1,52 @@
-import { auth } from '@clerk/nextjs/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { ok, fail } from '@/lib/utils/api'
+import { validatePayload, schemas } from '@/lib/utils/validate'
+import { isRateLimited, rateLimitConfigs } from '@/lib/utils/rateLimit'
+import { logger } from '@/lib/errors'
 
 /**
  * POST /api/admin/users/deactivate
  * Soft deactivate a user (mark as inactive)
+ *
+ * TODO: Once User schema includes an isActive/status field, update this endpoint to:
+ * - Update user.isActive = false or user.status = 'INACTIVE'
+ * - Set user.deactivatedAt = now()
+ * - This enables soft-deactivation (non-destructive state change)
+ * - Prevent deactivated users from logging in or accessing resources
  */
 export async function POST(request: NextRequest) {
 	try {
-		const { userId } = await auth()
+		const adminCheck = await requireAdmin()
+		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
 
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		const userId = adminCheck.user.id
+
+		// Rate limiting for sensitive user operations
+		if (isRateLimited(`admin:deactivate:${userId}`, rateLimitConfigs.adminSensitive.limit, rateLimitConfigs.adminSensitive.windowMs)) {
+			return fail({ code: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' }, { status: 429 })
 		}
 
-		// Verify admin role
-		const admin = await db.user.findUnique({
-			where: { id: userId }
-		})
-
-		if (admin?.role !== 'ADMIN') {
-			return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
+		// Content-Type guard
+		const contentType = request.headers.get('content-type') || ''
+		if (!contentType.includes('application/json')) {
+			return fail({ code: 'UNSUPPORTED_MEDIA_TYPE', message: 'Unsupported content type' }, { status: 415 })
 		}
 
-		const { userId: targetUserId } = await request.json()
-
-		if (!targetUserId) {
-			return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+		// Parse and validate JSON
+		let parsed: unknown
+		try {
+			parsed = await request.json()
+		} catch {
+			return fail({ code: 'BAD_REQUEST', message: 'Invalid JSON body' }, { status: 400 })
 		}
+
+		// Validate payload
+		const validation = validatePayload<{ userId: string }>(parsed, schemas.userId)
+		if (!validation.ok) return validation.response
+
+		const { userId: targetUserId } = validation.data
 
 		// Prevent deactivating admins
 		const targetUser = await db.user.findUnique({
@@ -35,14 +54,14 @@ export async function POST(request: NextRequest) {
 		})
 
 		if (!targetUser) {
-			return NextResponse.json({ error: 'User not found' }, { status: 404 })
+			return fail({ code: 'NOT_FOUND', message: 'User not found' }, { status: 404 })
 		}
 
 		if (targetUser.role === 'ADMIN') {
-			return NextResponse.json({ error: 'Cannot deactivate admin users' }, { status: 400 })
+			return fail({ code: 'BAD_REQUEST', message: 'Cannot deactivate admin users' }, { status: 400 })
 		}
 
-		// Log admin action (implementation uses a status field - you'll need to add this to schema)
+		// Log admin action
 		await db.userAction.create({
 			data: {
 				userId: userId,
@@ -55,14 +74,23 @@ export async function POST(request: NextRequest) {
 			}
 		})
 
-		// For now, we're just logging the action
-		// In production, add an 'status' or 'isActive' field to User model
-		return NextResponse.json({
-			success: true,
+		logger.info('User deactivated', { targetUserId, adminId: userId })
+
+		// TODO: Once schema supports isActive/status field, update to:
+		// const updated = await db.user.update({
+		//   where: { id: targetUserId },
+		//   data: { isActive: false, deactivatedAt: new Date() }
+		// })
+		// return ok({
+		//   message: `User ${targetUser.email} deactivated`,
+		//   user: updated
+		// })
+
+		return ok({
 			message: `User ${targetUser.email} deactivated (action logged)`
 		})
 	} catch (error) {
-		console.error('Deactivate user error:', error)
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+		logger.error('Deactivate user error', error)
+		return fail({ code: 'SERVER_ERROR', message: 'Internal server error' }, { status: 500 })
 	}
 }
