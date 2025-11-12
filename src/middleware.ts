@@ -1,8 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-interface SessionMetadata {
+interface ClerkPublicMetadata {
   role?: string;
+  onboardingCompleted?: boolean;
 }
 
 // Define public routes that don't require authentication
@@ -20,6 +21,13 @@ const isPublicRoute = createRouteMatcher([
   "/api/enrollments(.*)",
 ]);
 
+// Helper function to safely extract and normalize role from Clerk's publicMetadata
+function getUserRole(sessionClaims: Record<string, unknown> | null): string {
+  const metadata = sessionClaims?.publicMetadata as ClerkPublicMetadata | undefined;
+  const roleValue = metadata?.role as string | undefined;
+  return (roleValue || "student").toLowerCase();
+}
+
 export default clerkMiddleware(async (auth, request) => {
   const pathname = request.nextUrl.pathname;
 
@@ -36,23 +44,21 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // Lazily fetch sessionClaims when role checks are needed so we don't call auth() unnecessarily.
-  let sessionClaims: { metadata?: SessionMetadata } | null | undefined;
+  // Lazily fetch sessionClaims when role checks are needed
+  let sessionClaims: Record<string, unknown> | null = null;
   if (
     pathname.startsWith("/api/admin") ||
     pathname.startsWith("/admin") ||
     pathname === "/dashboard" ||
     pathname.startsWith("/dashboard/")
   ) {
-  const res = await auth();
-  // Cast Clerk's sessionClaims to a shape that includes our metadata for role checks
-  sessionClaims = (res.sessionClaims as unknown) as { metadata?: SessionMetadata } | null;
+    const res = await auth();
+    sessionClaims = res.sessionClaims as Record<string, unknown> | null;
   }
 
   // API admin protection: return 401 for non-admins
   if (pathname.startsWith("/api/admin")) {
-    const role = (sessionClaims?.metadata as SessionMetadata)?.role as string | undefined;
-    const userRole = role?.toLowerCase() || "student";
+    const userRole = getUserRole(sessionClaims);
     if (userRole !== "admin") {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -60,8 +66,7 @@ export default clerkMiddleware(async (auth, request) => {
 
   // UI admin protection: redirect non-admins away from /admin pages
   if (pathname.startsWith("/admin")) {
-    const role = (sessionClaims?.metadata as SessionMetadata)?.role as string | undefined;
-    const userRole = role?.toLowerCase() || "student";
+    const userRole = getUserRole(sessionClaims);
     if (userRole !== "admin") {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
@@ -69,8 +74,7 @@ export default clerkMiddleware(async (auth, request) => {
 
   // Handle dashboard routing based on user role
   if (pathname === "/dashboard") {
-    const role = (sessionClaims?.metadata as SessionMetadata)?.role as string | undefined;
-    const userRole = (role || "student").toLowerCase();
+    const userRole = getUserRole(sessionClaims);
     const validRoles = ["student", "instructor", "admin"];
     if (!validRoles.includes(userRole)) {
       return NextResponse.redirect(new URL("/dashboard/student", request.url));
@@ -81,9 +85,7 @@ export default clerkMiddleware(async (auth, request) => {
 
   // Protect role-specific dashboard routes
   if (pathname.startsWith("/dashboard/")) {
-    const role = (sessionClaims?.metadata as SessionMetadata)?.role as string | undefined;
-    const userRole = (role || "student").toLowerCase();
-
+    const userRole = getUserRole(sessionClaims);
     const pathSegments = pathname.split("/");
     const requestedRole = pathSegments[2];
 
@@ -104,6 +106,5 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
-};
-// fixed and changes the routes and 
+}; 
 
