@@ -19,10 +19,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    // Enable new Next.js features
-    serverComponentsExternalPackages: ["@prisma/client"],
-  },
+  serverExternalPackages: ["@prisma/client"],
 };
 
 export default nextConfig;
