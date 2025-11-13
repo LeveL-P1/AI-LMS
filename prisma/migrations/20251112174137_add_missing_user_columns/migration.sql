@@ -1,11 +1,23 @@
 /*
-  Warnings:
-
-  - A unique constraint covering the columns `[clerkId]` on the table `User` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `clerkId` to the `User` table without a default value. This is not possible if the table is not empty.
-
+  Migration to add missing clerkId and other user columns
+  Handles existing data by generating temporary clerkIds for current users
 */
--- AlterTable
+
+-- First add the columns as nullable to avoid conflicts with existing data
+ALTER TABLE "User" ADD COLUMN     "clerkId" TEXT,
+ADD COLUMN     "firstName" TEXT,
+ADD COLUMN     "imageUrl" TEXT,
+ADD COLUMN     "lastName" TEXT;
+
+-- Update existing users with temporary clerkId values based on their email
+-- This ensures uniqueness while preserving existing data
+UPDATE "User" SET "clerkId" = 'temp_' || REPLACE("email", '@', '_at_') WHERE "clerkId" IS NULL;
+
+-- Now make clerkId NOT NULL and add unique constraint
+ALTER TABLE "User" ALTER COLUMN "clerkId" SET NOT NULL;
+ALTER TABLE "User" ADD CONSTRAINT "User_clerkId_key" UNIQUE ("clerkId");
+
+-- Add new columns to Course table
 ALTER TABLE "Course" ADD COLUMN     "duration" INTEGER,
 ADD COLUMN     "enrollmentCount" INTEGER NOT NULL DEFAULT 0,
 ADD COLUMN     "isPublished" BOOLEAN NOT NULL DEFAULT false,
@@ -13,19 +25,6 @@ ADD COLUMN     "level" TEXT NOT NULL DEFAULT 'beginner',
 ADD COLUMN     "price" DOUBLE PRECISION NOT NULL DEFAULT 0,
 ADD COLUMN     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
 ADD COLUMN     "thumbnail" TEXT;
-
--- First add the columns as nullable
-ALTER TABLE "User" ADD COLUMN     "clerkId" TEXT,
-ADD COLUMN     "firstName" TEXT,
-ADD COLUMN     "imageUrl" TEXT,
-ADD COLUMN     "lastName" TEXT;
-
--- Update existing users with temporary clerkId values
-UPDATE "User" SET "clerkId" = 'temp_' || "id" WHERE "clerkId" IS NULL;
-
--- Now make clerkId NOT NULL and add unique constraint
-ALTER TABLE "User" ALTER COLUMN "clerkId" SET NOT NULL;
-ALTER TABLE "User" ADD CONSTRAINT "User_clerkId_key" UNIQUE ("clerkId");
 
 -- CreateTable
 CREATE TABLE "Chapter" (

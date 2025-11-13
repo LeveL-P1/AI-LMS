@@ -73,17 +73,19 @@ model RolePermission {
 
 model User {
   id          String        @id
+  clerkId     String        @unique
   email       String        @unique
   name        String?
   role        UserRole      @default(STUDENT)
   createdAt   DateTime      @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime      @default(now())
   ChatMessage ChatMessage[]
   Course      Course[]
   Enrollment  Enrollment[]
   UserAction  UserAction[]
 
   @@index([role], map: "idx_user_role")
+  @@index([clerkId], map: "idx_user_clerkId")
 }
 
 model UserAction {
