@@ -1,5 +1,6 @@
 'use client'
 
+import { ClerkProvider } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { getAuthenticatedUser } from '@/lib/auth/core'

@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { headers } from 'next/headers'
+import { ClerkProvider } from '@clerk/nextjs'
 
 /**
  * When TEST_BYPASS_AUTH=1, allow overriding the authenticated user with the

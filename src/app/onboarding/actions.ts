@@ -3,6 +3,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/prisma/prisma'
+import { ClerkProvider } from '@clerk/nextjs'
 
 export async function updateUserRole(role: string) {
   try {

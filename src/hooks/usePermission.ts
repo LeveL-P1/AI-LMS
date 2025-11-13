@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/errors';
+import { ClerkProvider } from '@clerk/nextjs'
 
 /**
  * Hook to fetch and manage user permissions

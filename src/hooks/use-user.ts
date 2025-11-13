@@ -4,6 +4,7 @@
 
 import { useUser as useClerkUser } from "@clerk/nextjs";
 import { UserRole } from "@/types";
+import { ClerkProvider } from '@clerk/nextjs'
 
 export function useUser() {
   const { user, isLoaded, isSignedIn } = useClerkUser();

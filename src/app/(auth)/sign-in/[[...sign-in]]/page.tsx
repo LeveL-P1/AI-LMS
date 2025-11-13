@@ -1,4 +1,5 @@
 import { SignIn } from "@clerk/nextjs";
+import { ClerkProvider } from '@clerk/nextjs'
 
 export default function SignInPage() {
   return (

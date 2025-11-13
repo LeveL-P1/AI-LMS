@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/prisma/prisma'
 import { UserRole, Permission } from '@/types/globals'
 import { logger } from '@/lib/errors'
+import { ClerkProvider } from '@clerk/nextjs'
 
 export interface AuthenticatedUser {
   id: string

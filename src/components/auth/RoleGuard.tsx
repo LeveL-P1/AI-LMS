@@ -3,6 +3,7 @@
 import { ReactNode } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { UserRole, Permission } from '@/types/globals'
+import { ClerkProvider } from '@clerk/nextjs'
 
 interface RoleGuardProps {
   children: ReactNode
