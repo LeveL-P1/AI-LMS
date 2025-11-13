@@ -3,11 +3,11 @@ import { currentUser } from "@clerk/nextjs/server";
 import type { UserRole } from "@prisma/client";
 
 export async function syncUser() {
-  const user = await currentUser();
-  if (!user) return null;
+  const clerkUser = await currentUser();
+  if (!clerkUser) return null;
 
   // Normalize role from Clerk metadata (stored as lowercase) to Prisma enum (UPPERCASE)
-  const roleString = (user.publicMetadata?.role as string) || "student";
+  const roleString = (clerkUser.publicMetadata?.role as string) || "student";
   const normalizedRole = roleString.toUpperCase();
   
   // Validate that the normalized role is a valid enum value
@@ -16,18 +16,19 @@ export async function syncUser() {
     ? normalizedRole as UserRole 
     : "STUDENT");
 
-  // Use upsert to handle both create and update cases using email as the unique identifier
-  // Let Prisma auto-generate updatedAt and createdAt
+  // Use upsert to handle both create and update cases using clerkId as the unique identifier
   return await db.user.upsert({
-    where: { email: user.emailAddresses[0]?.emailAddress || "" },
+    where: { clerkId: clerkUser.id },
     update: {
-      name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+      name: clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
       role,
     },
     create: {
-      id: user.id, // Use Clerk user ID as the primary key
-      email: user.emailAddresses[0]?.emailAddress || "",
-      name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      id: `user_${clerkUser.id}`, // Generate ID if not provided
+      clerkId: clerkUser.id,
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+      name: clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
       role,
     },
   });
