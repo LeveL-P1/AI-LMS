@@ -1,6 +1,6 @@
-import { auth } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { requirePermission } from '@/lib/auth/guards'
 import { db } from '@/lib/prisma/prisma'
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/admin/users
@@ -8,20 +8,14 @@ import { db } from '@/lib/prisma/prisma'
  */
 export async function GET() {
 	try {
-		const { userId } = await auth()
-
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		// Use new permission-based guard
+		const authResult = await requirePermission('MANAGE_USERS')
+		
+		if (authResult instanceof Response) {
+			return authResult // Return error response
 		}
 
-		// Verify admin role
-		const user = await db.user.findUnique({
-			where: { id: userId }
-		})
-
-		if (user?.role !== 'ADMIN') {
-			return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
-		}
+		// authResult is the authenticated user
 
 		// Fetch all users with enrollment counts
 		const users = await db.user.findMany({
@@ -32,7 +26,7 @@ export async function GET() {
 				role: true,
 				createdAt: true,
 				_count: {
-					select: { enrollments: true }
+					select: { Enrollment: true }
 				}
 			},
 			orderBy: { createdAt: 'desc' }
@@ -45,7 +39,7 @@ export async function GET() {
 				name: u.name,
 				role: u.role,
 				createdAt: u.createdAt,
-				enrollmentCount: u._count.enrollments
+				enrollmentCount: u._count.Enrollment
 			}))
 		)
 	} catch (error) {

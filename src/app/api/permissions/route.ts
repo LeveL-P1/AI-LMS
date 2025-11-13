@@ -1,8 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
-import { db } from '@/lib/prisma/prisma';
-import { NextResponse } from 'next/server';
-import { logger } from '@/lib/errors';
-import { ok, fail } from '@/lib/utils/api';
+import { getAuthenticatedUser } from '@/lib/auth/core'
+import { NextResponse } from 'next/server'
+import { logger } from '@/lib/errors'
 
 /**
  * GET /api/permissions
@@ -10,41 +8,27 @@ import { ok, fail } from '@/lib/utils/api';
  */
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const user = await getAuthenticatedUser()
     
-    if (!userId) {
-      return fail({ code: 'UNAUTHORIZED', message: 'Unauthorized' }, { status: 401 });
-    }
-
-// Get user from database by email
-    const user = await db.user.findFirst({
-      where: {
-        email: userId,
-      },
-    });
-
     if (!user) {
-      logger.warn('User not found for permissions check', { userId });
-      // Return default student permissions if user not yet in database
-      const rolePermissions = await db.rolePermission.findMany({
-        where: { role: 'STUDENT' },
-        select: { permission: true },
-      });
-      const permissions = rolePermissions.map(rp => rp.permission);
-      return ok(permissions);
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      )
     }
 
-    // Get permissions for user's role
-    const rolePermissions = await db.rolePermission.findMany({
-      where: { role: user.role },
-      select: { permission: true },
-    });
-
-    const permissions = rolePermissions.map(rp => rp.permission);
-    logger.info('Permissions retrieved', { userId, role: user.role, permissionCount: permissions.length });
-    return ok(permissions);
+    logger.info('Permissions retrieved', { 
+      userId: user.id, 
+      role: user.role, 
+      permissionCount: user.permissions.length 
+    })
+    
+    return NextResponse.json(user.permissions)
   } catch (error) {
-    logger.error('Failed to fetch permissions', error);
-    return fail({ code: 'SERVER_ERROR', message: 'Failed to fetch permissions' }, { status: 500 });
+    logger.error('Failed to fetch permissions', error)
+    return NextResponse.json(
+      { error: { code: 'SERVER_ERROR', message: 'Failed to fetch permissions' } },
+      { status: 500 }
+    )
   }
 }
