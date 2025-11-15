@@ -6,5 +6,6 @@
 
     },
     "workbench.preferredHighContrastColorTheme": "Tomorrow Night Blue",
-    "material-icon-theme.activeIconPack": "react"
+    "material-icon-theme.activeIconPack": "react",
+    "git.ignoreLimitWarning": true
 }
