@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 		})
 
 		if (!paginationResult.success) {
-			return validationErrorResponse(paginationResult.error.errors)
+			return validationErrorResponse(paginationResult.error.issues)
 		}
 
 		const { page, limit } = paginationResult.data
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 		const enrollments = await db.enrollment.findMany({
 			where: { userId: user.id },
 			include: {
-				course: {
+				Course: {
 					select: {
 						id: true,
 						title: true,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 		const validationResult = enrollmentSchema.safeParse(body)
 
 		if (!validationResult.success) {
-			return validationErrorResponse(validationResult.error.errors)
+			return validationErrorResponse(validationResult.error.issues)
 		}
 
 		const { courseId } = validationResult.data
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 				status: 'ACTIVE',
 			},
 			include: {
-				course: {
+				Course: {
 					select: {
 						id: true,
 						title: true,

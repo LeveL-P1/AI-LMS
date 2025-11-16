@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { ok, fail } from '@/lib/utils/api'
@@ -13,9 +13,9 @@ import { logger } from '@/lib/errors'
 export async function POST(request: NextRequest) {
 	try {
 		const adminCheck = await requireAdmin()
-		if ('response' in adminCheck) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
-		const userId = adminCheck.user.id
+		const userId = adminCheck.id
 
 		// Rate limiting for sensitive user operations
 		if (isRateLimited(`admin:promote:${userId}`, rateLimitConfigs.adminSensitive.limit, rateLimitConfigs.adminSensitive.windowMs)) {

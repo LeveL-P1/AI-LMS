@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { ok, fail } from '@/lib/utils/api'
@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
 	try {
 		// Rate limiting for sensitive admin operations
 		const adminCheck = await requireAdmin()
-		if ('response' in adminCheck) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
-		const userId = adminCheck.user.id
+		const userId = adminCheck.id
 		if (isRateLimited(`admin:suspend:${userId}`, rateLimitConfigs.adminSensitive.limit, rateLimitConfigs.adminSensitive.windowMs)) {
 			return fail({ code: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' }, { status: 429 })
 		}
