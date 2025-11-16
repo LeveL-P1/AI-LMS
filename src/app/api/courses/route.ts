@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 		})
 
 		if (!paginationResult.success) {
-			return validationErrorResponse(paginationResult.error.errors)
+			return validationErrorResponse(paginationResult.error.issues)
 		}
 
 		const { page, limit } = paginationResult.data
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
 		const validationResult = createCourseSchema.safeParse(body)
 
 		if (!validationResult.success) {
-			return validationErrorResponse(validationResult.error.errors)
+			return validationErrorResponse(validationResult.error.issues)
 		}
 
 		const { title, description, thumbnail } = validationResult.data

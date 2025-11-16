@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { ok, fail } from '@/lib/utils/api'
@@ -11,9 +12,9 @@ import { logger } from '@/lib/errors'
 export async function GET() {
 	try {
 		const adminCheck = await requireAdmin()
-		if ('response' in adminCheck) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
-		const userId = adminCheck.user.id
+		const userId = adminCheck.id
 
 		// Rate limiting for stats queries (general limit, not sensitive)
 		if (isRateLimited(`admin:stats:${userId}`, rateLimitConfigs.adminGeneral.limit, rateLimitConfigs.adminGeneral.windowMs)) {

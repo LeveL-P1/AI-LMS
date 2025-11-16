@@ -26,7 +26,7 @@ export async function GET() {
 				role: true,
 				createdAt: true,
 				_count: {
-					select: { Enrollment: true }
+					select: { enrollments: true }
 				}
 			},
 			orderBy: { createdAt: 'desc' }
@@ -39,7 +39,7 @@ export async function GET() {
 				name: u.name,
 				role: u.role,
 				createdAt: u.createdAt,
-				enrollmentCount: u._count.Enrollment
+				enrollmentCount: u._count.enrollments
 			}))
 		)
 	} catch (error) {

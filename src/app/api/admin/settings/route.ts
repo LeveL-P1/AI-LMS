@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { ok, fail } from '@/lib/utils/api'
@@ -37,9 +37,9 @@ const platformSettingsStore: PlatformSettings = {
 export async function GET() {
 	try {
 		const adminCheck = await requireAdmin()
-		if ('response' in adminCheck) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
-		logger.info('Settings fetched', { adminId: adminCheck.user.id })
+		logger.info('Settings fetched', { adminId: adminCheck.id })
 		return ok(platformSettingsStore)
 	} catch (error) {
 		logger.error('Fetch settings error', error)
@@ -59,9 +59,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
 	try {
 		const adminCheck = await requireAdmin()
-		if ('response' in adminCheck) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
-		const userId = adminCheck.user.id
+		const userId = adminCheck.id
 
 		// Rate limiting for settings updates
 		if (isRateLimited(`admin:settings:${userId}`, rateLimitConfigs.adminGeneral.limit, rateLimitConfigs.adminGeneral.windowMs)) {
