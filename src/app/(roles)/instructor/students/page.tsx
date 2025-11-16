@@ -12,9 +12,18 @@ interface StudentsPageProps {
 }
 
 export default async function CourseStudentsPage({ params }: StudentsPageProps) {
-	const { userId } = await auth()
+	const { userId: clerkId } = await auth()
 
-	if (!userId) {
+	if (!clerkId) {
+		redirect('/sign-in')
+	}
+
+	// Get current user from database
+	const currentUser = await db.user.findUnique({
+		where: { clerkId },
+	})
+
+	if (!currentUser) {
 		redirect('/sign-in')
 	}
 
@@ -23,7 +32,7 @@ export default async function CourseStudentsPage({ params }: StudentsPageProps) 
 		include: {
 			instructor: true,
 			enrollments: {
-				include: { user: true },
+				include: { User: true },
 				orderBy: { createdAt: 'desc' },
 			},
 		},
@@ -38,7 +47,7 @@ export default async function CourseStudentsPage({ params }: StudentsPageProps) 
 	}
 
 	// Verify instructor owns this course
-	if (course.instructorId !== userId) {
+	if (course.instructorId !== currentUser.id) {
 		redirect('/unauthorized')
 	}
 
@@ -90,13 +99,13 @@ export default async function CourseStudentsPage({ params }: StudentsPageProps) 
 										<tr key={enrollment.id} className="border-b hover:bg-muted/50">
 											<td className="py-3 px-4">
 												<div>
-													<p className="font-medium">{enrollment.user.name}</p>
+													<p className="font-medium">{enrollment.User.name}</p>
 												</div>
 											</td>
 											<td className="py-3 px-4">
 												<div className="flex items-center space-x-2">
 													<Mail className="h-4 w-4 text-muted-foreground" />
-													<span className="text-sm">{enrollment.user.email}</span>
+													<span className="text-sm">{enrollment.User.email}</span>
 												</div>
 											</td>
 											<td className="py-3 px-4">

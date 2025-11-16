@@ -32,6 +32,13 @@ export default async function AdminDashboard() {
   const students = await db.user.count({ where: { role: 'STUDENT' } })
   const instructors = await db.user.count({ where: { role: 'INSTRUCTOR' } })
   const publishedCourses = await db.course.count({ where: { isPublished: true } })
+  
+  // Get recent users
+  const recentUsers = await db.user.findMany({
+    take: 5,
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, name: true, email: true, role: true, createdAt: true }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

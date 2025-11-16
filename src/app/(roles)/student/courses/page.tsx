@@ -22,13 +22,13 @@ export default async function StudentCoursesPage() {
 
 	const enrollments = await db.enrollment.findMany({
 		where: { userId: student.id },
-		include: { course: { include: { instructor: true } } },
+		include: { Course: { include: { instructor: true } } },
 	})
 
 	const actions = await db.userAction.findMany({ where: { userId: student.id } })
 
 const enrolled: Enrolled[] = enrollments.map((e) => {
-		const course = e.course
+		const course = e.Course
 		// derive a crude progress metric from user actions that reference this course
 		const seen = actions.filter((a) => ((a.metadata as Record<string, any>)?.courseId as string) === course.id).length
 		const progress = Math.min(100, Math.round((seen / 10) * 100))

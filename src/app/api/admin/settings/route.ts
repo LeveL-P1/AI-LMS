@@ -37,7 +37,7 @@ const platformSettingsStore: PlatformSettings = {
 export async function GET() {
 	try {
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		if ('response' in adminCheck) return adminCheck.response
 
 		logger.info('Settings fetched', { adminId: adminCheck.user.id })
 		return ok(platformSettingsStore)
@@ -59,7 +59,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
 	try {
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		if ('response' in adminCheck) return adminCheck.response
 
 		const userId = adminCheck.user.id
 
@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
 		// Log admin action
 		await db.userAction.create({
 			data: {
+				id: `action_${userId}_${Date.now()}`,
 				userId: userId,
 				actionType: 'UPDATE_SETTINGS',
 				metadata: {

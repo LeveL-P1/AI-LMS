@@ -74,11 +74,11 @@ export async function POST(req: NextRequest) {
 
   if (type === 'user.created' || type === 'user.updated') {
     try {
-      // Get the role from public_metadata, default to STUDENT
-      const role = data.public_metadata?.role || 'STUDENT'
+      // Get the role from public_metadata, default to STUDENT, ensure uppercase
+      const role = ((data.public_metadata?.role as string) || 'STUDENT').toUpperCase()
       
       // Get primary email
-      const email = data.email_addresses.find(email => email.id === data.email_addresses[0]?.id)?.email_address
+      const email = data.email_addresses[0]?.email_address
       
       if (!email) {
         console.error('No email found for user:', data.id)
@@ -87,16 +87,20 @@ export async function POST(req: NextRequest) {
 
       // Upsert user in database
       await db.user.upsert({
-where: {
-          email: email,
-        },
-update: {
+        where: { email },
+        update: {
           name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
+          firstName: data.first_name || null,
+          lastName: data.last_name || null,
+          role: role as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
         },
         create: {
+          clerkId: data.id,
           email,
           name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-          role: role.toUpperCase() as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
+          firstName: data.first_name || null,
+          lastName: data.last_name || null,
+          role: role as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
         },
       })
 

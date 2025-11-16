@@ -11,7 +11,7 @@ import { ok, fail } from '@/lib/utils/api'
 export async function GET() {
 	try {
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		if ('response' in adminCheck) return adminCheck.response
 
 		// Fetch all courses with instructor and enrollment info
 		const courses = await db.course.findMany({

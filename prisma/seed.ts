@@ -35,24 +35,24 @@ async function main() {
   // Create users
   // create an admin, several instructors and many students
   await prisma.user.create({
-    data: { email: "admin@learndash.com", name: "System Administrator", role: UserRole.ADMIN },
+    data: { clerkId: "clerk_admin", email: "admin@learndash.com", name: "System Administrator", role: UserRole.ADMIN },
   });
 
   const instructors = await Promise.all([
-    prisma.user.create({ data: { email: "alice.instructor@learndash.com", name: "Alice Instructor", role: UserRole.INSTRUCTOR } }),
-    prisma.user.create({ data: { email: "bob.instructor@learndash.com", name: "Bob Instructor", role: UserRole.INSTRUCTOR } }),
-    prisma.user.create({ data: { email: "carla.instructor@learndash.com", name: "Carla Instructor", role: UserRole.INSTRUCTOR } }),
+    prisma.user.create({ data: { clerkId: "clerk_alice", email: "alice.instructor@learndash.com", name: "Alice Instructor", role: UserRole.INSTRUCTOR } }),
+    prisma.user.create({ data: { clerkId: "clerk_bob", email: "bob.instructor@learndash.com", name: "Bob Instructor", role: UserRole.INSTRUCTOR } }),
+    prisma.user.create({ data: { clerkId: "clerk_carla", email: "carla.instructor@learndash.com", name: "Carla Instructor", role: UserRole.INSTRUCTOR } }),
   ]);
 
   const students = await Promise.all([
-    prisma.user.create({ data: { email: "student1@learndash.com", name: "Student One", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student2@learndash.com", name: "Student Two", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student3@learndash.com", name: "Student Three", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student4@learndash.com", name: "Student Four", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student5@learndash.com", name: "Student Five", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student6@learndash.com", name: "Student Six", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student7@learndash.com", name: "Student Seven", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { email: "student8@learndash.com", name: "Student Eight", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s1", email: "student1@learndash.com", name: "Student One", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s2", email: "student2@learndash.com", name: "Student Two", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s3", email: "student3@learndash.com", name: "Student Three", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s4", email: "student4@learndash.com", name: "Student Four", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s5", email: "student5@learndash.com", name: "Student Five", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s6", email: "student6@learndash.com", name: "Student Six", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s7", email: "student7@learndash.com", name: "Student Seven", role: UserRole.STUDENT } }),
+    prisma.user.create({ data: { clerkId: "clerk_s8", email: "student8@learndash.com", name: "Student Eight", role: UserRole.STUDENT } }),
   ]);
 
   console.log("👥 Created users");
@@ -76,7 +76,7 @@ async function main() {
     const count = 2 + Math.floor(Math.random() * 3);
     const shuffled = allCourses.sort(() => 0.5 - Math.random());
     for (let i = 0; i < count; i++) {
-      enrollmentPromises.push(prisma.enrollment.create({ data: { userId: s.id, courseId: shuffled[i].id } }));
+      enrollmentPromises.push(prisma.enrollment.create({ data: { id: `enroll_${s.id}_${shuffled[i].id}`, userId: s.id, courseId: shuffled[i].id, status: 'ACTIVE' } }));
     }
   }
   await Promise.all(enrollmentPromises);
@@ -86,14 +86,14 @@ async function main() {
   // Create chat rooms and messages for a subset of courses
   const sampleCourses = allCourses.slice(0, 4);
   for (const c of sampleCourses) {
-    const room = await prisma.chatRoom.create({ data: { courseId: c.id } });
+    const room = await prisma.chatRoom.create({ data: { id: `room_${c.id}`, courseId: c.id, updatedAt: new Date() } });
     // pick a random instructor and a random student for messages
     const randInstructor = instructors[Math.floor(Math.random() * instructors.length)];
     const randStudent = students[Math.floor(Math.random() * students.length)];
     await prisma.chatMessage.createMany({
       data: [
-        { chatRoomId: room.id, senderId: randInstructor.id, content: "Welcome to the course!" },
-        { chatRoomId: room.id, senderId: randStudent.id, content: "Excited to learn." },
+        { id: `msg_${room.id}_1`, chatRoomId: room.id, senderId: randInstructor.id, content: "Welcome to the course!" },
+        { id: `msg_${room.id}_2`, chatRoomId: room.id, senderId: randStudent.id, content: "Excited to learn." },
       ],
     });
   }
@@ -107,7 +107,7 @@ async function main() {
     const acting = Math.random() < 0.6 ? students[Math.floor(Math.random() * students.length)] : instructors[Math.floor(Math.random() * instructors.length)];
     const actionType = Math.random() < 0.5 ? "VIEWED_COURSE" : "STARTED_LESSON";
     const meta = { courseId: allCourses[Math.floor(Math.random() * allCourses.length)].id };
-    actionPromises.push(prisma.userAction.create({ data: { userId: acting.id, actionType, metadata: meta as any } }));
+    actionPromises.push(prisma.userAction.create({ data: { id: `action_${acting.id}_${i}`, userId: acting.id, actionType, metadata: meta } }));
   }
   await Promise.all(actionPromises);
 

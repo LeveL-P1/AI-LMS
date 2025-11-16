@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 	try {
 		// Rate limiting for sensitive admin operations
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
 		const userId = adminCheck.user.id
 		if (isRateLimited(`admin:resume:${userId}`, rateLimitConfigs.adminSensitive.limit, rateLimitConfigs.adminSensitive.windowMs)) {
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
 		// Log admin action
 		await db.userAction.create({
 			data: {
+				id: `action_${userId}_${Date.now()}`,
 				userId: userId,
 				actionType: 'RESUME_COURSE',
 				metadata: {

@@ -11,7 +11,7 @@ import { logger } from '@/lib/errors'
 export async function GET() {
 	try {
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		if ('response' in adminCheck) return adminCheck.response
 
 		const userId = adminCheck.user.id
 
@@ -29,7 +29,7 @@ export async function GET() {
 				db.userAction.findMany({
 					take: 10,
 					orderBy: { createdAt: 'desc' },
-					include: { user: { select: { name: true } } }
+					include: { User: { select: { name: true } } }
 				}),
 				db.user.count({ where: { role: 'INSTRUCTOR' } }),
 				db.user.count({ where: { role: 'STUDENT' } })
@@ -46,7 +46,7 @@ export async function GET() {
 			recentActions: recentActions.map((action) => ({
 				id: action.id,
 				userId: action.userId,
-				userName: action.user.name || 'Unknown',
+				userName: action.User.name || 'Unknown',
 				actionType: action.actionType,
 				timestamp: action.createdAt
 			}))

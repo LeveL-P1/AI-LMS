@@ -12,9 +12,18 @@ interface CourseDetailPageProps {
 }
 
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
-	const { userId } = await auth()
+	const { userId: clerkId } = await auth()
 
-	if (!userId) {
+	if (!clerkId) {
+		redirect('/sign-in')
+	}
+
+	// Get current user from database
+	const currentUser = await db.user.findUnique({
+		where: { clerkId },
+	})
+
+	if (!currentUser) {
 		redirect('/sign-in')
 	}
 
@@ -22,7 +31,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 		where: { id: params.courseId },
 		include: {
 			instructor: true,
-			enrollments: { include: { user: true } },
+			enrollments: { include: { User: true } },
 			_count: { select: { enrollments: true } },
 		},
 	})
@@ -36,7 +45,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 	}
 
 	// Verify instructor owns this course
-	if (course.instructorId !== userId) {
+	if (course.instructorId !== currentUser.id) {
 		redirect('/unauthorized')
 	}
 
@@ -160,8 +169,8 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 							{recentEnrollments.map((enrollment) => (
 								<div key={enrollment.id} className="flex items-center justify-between border-b pb-3 last:border-0">
 									<div>
-										<p className="font-medium">{enrollment.user.name}</p>
-										<p className="text-sm text-muted-foreground">{enrollment.user.email}</p>
+										<p className="font-medium">{enrollment.User.name}</p>
+										<p className="text-sm text-muted-foreground">{enrollment.User.email}</p>
 									</div>
 									<p className="text-xs text-muted-foreground">
 										{new Date(enrollment.createdAt).toLocaleDateString()}

@@ -16,7 +16,7 @@ export default async function InstructorDashboard() {
   const user = await db.user.findUnique({
     where: { clerkId: userId },
     include: {
-      createdCourses: {
+      courses: {
         include: {
           enrollments: true,
           chapters: true,
@@ -30,10 +30,10 @@ export default async function InstructorDashboard() {
     redirect('/onboarding')
   }
 
-  const totalCourses = user.createdCourses.length
-  const publishedCourses = user.createdCourses.filter(course => course.isPublished).length
-  const totalStudents = user.createdCourses.reduce((sum, course) => sum + course.enrollments.length, 0)
-  const totalChapters = user.createdCourses.reduce((sum, course) => sum + course.chapters.length, 0)
+  const totalCourses = user.courses.length
+  const publishedCourses = user.courses.filter(course => course.isPublished).length
+  const totalStudents = user.courses.reduce((sum, course) => sum + course.enrollments.length, 0)
+  const totalChapters = user.courses.reduce((sum, course) => sum + course.chapters.length, 0)
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -112,9 +112,9 @@ export default async function InstructorDashboard() {
               <CardDescription>Manage and track your course performance</CardDescription>
             </CardHeader>
             <CardContent>
-              {user.createdCourses.length > 0 ? (
+              {user.courses.length > 0 ? (
                 <div className="space-y-4">
-                  {user.createdCourses.slice(0, 5).map((course) => (
+                  {user.courses.slice(0, 5).map((course) => (
                     <div key={course.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -137,9 +137,9 @@ export default async function InstructorDashboard() {
                       </div>
                     </div>
                   ))}
-                  {user.createdCourses.length > 5 && (
+                  {user.courses.length > 5 && (
                     <Button variant="outline" className="w-full">
-                      View All Courses ({user.createdCourses.length})
+                      View All Courses ({user.courses.length})
                     </Button>
                   )}
                 </div>

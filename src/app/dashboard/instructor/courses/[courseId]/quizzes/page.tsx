@@ -1,9 +1,9 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { db } from '@/lib/prisma'
+import { db } from '@/lib/prisma/prisma'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/common/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/ui/card'
 
 export default async function QuizListPage(props: any) {
   const { params } = props as { params: { courseId: string } }

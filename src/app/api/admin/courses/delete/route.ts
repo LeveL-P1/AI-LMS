@@ -11,8 +11,8 @@ import { ok, fail } from '@/lib/utils/api'
 export async function POST(request: NextRequest) {
 	try {
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
-		const userId = adminCheck.ok ? adminCheck.user.id : undefined
+		if (adminCheck instanceof NextResponse) return adminCheck
+		const userId = adminCheck.user.id
 
 		// Content-Type guard
 		const contentType = request.headers.get('content-type') || ''
@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
 		// Log admin action before deletion
 		await db.userAction.create({
 			data: {
+				id: `action_${userId}_${Date.now()}`,
 				userId: userId,
 				actionType: 'DELETE_COURSE',
 				metadata: {

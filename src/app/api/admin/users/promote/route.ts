@@ -13,7 +13,7 @@ import { logger } from '@/lib/errors'
 export async function POST(request: NextRequest) {
 	try {
 		const adminCheck = await requireAdmin()
-		if (!('ok' in adminCheck) || adminCheck.ok === false) return adminCheck.response
+		if ('response' in adminCheck) return adminCheck.response
 
 		const userId = adminCheck.user.id
 
@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
 		// Log admin action
 		await db.userAction.create({
 			data: {
+				id: `action_${userId}_${Date.now()}`,
 				userId: userId,
 				actionType: 'PROMOTE_TO_INSTRUCTOR',
 				metadata: {

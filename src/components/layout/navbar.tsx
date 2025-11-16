@@ -13,7 +13,10 @@ interface NavbarProps {
 }
 
 export function Navbar({ userRole }: NavbarProps) {
-  const { isLoaded, isSignedIn, role, isStudent, isInstructor } = useUser()
+  const { isLoaded, isSignedIn, role } = useUser()
+  
+  const isStudent = role === UserRole.STUDENT
+  const isInstructor = role === UserRole.INSTRUCTOR
 
   // Don't render until loaded
   if (!isLoaded) return null

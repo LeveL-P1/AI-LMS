@@ -44,9 +44,9 @@ export function Sidebar({ userRole }: SidebarProps) {
   const pathname = usePathname();
 
   let links = studentLinks; // Default to student links if role unrecognized
-  if (userRole === "instructor") {
+  if (userRole === "INSTRUCTOR") {
     links = instructorLinks;
-  } else if (userRole === "admin") {
+  } else if (userRole === "ADMIN") {
     links = adminLinks;
   }
 

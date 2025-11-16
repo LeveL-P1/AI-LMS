@@ -1,8 +1,18 @@
-import { UserRole, Permission } from '@/types/globals'
+import { UserRole } from '@/types'
+
+export type Permission = 
+  | 'CREATE_COURSE'
+  | 'EDIT_COURSE'
+  | 'DELETE_COURSE'
+  | 'VIEW_COURSE'
+  | 'SUBMIT_ASSIGNMENT'
+  | 'GRADE_ASSIGNMENT'
+  | 'VIEW_ANALYTICS'
+  | 'MANAGE_USERS'
 
 // Define role-permission mappings
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  ADMIN: [
+  [UserRole.ADMIN]: [
     'CREATE_COURSE',
     'EDIT_COURSE', 
     'DELETE_COURSE',
@@ -12,14 +22,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'VIEW_ANALYTICS',
     'MANAGE_USERS'
   ],
-  INSTRUCTOR: [
+  [UserRole.INSTRUCTOR]: [
     'CREATE_COURSE',
     'EDIT_COURSE',
     'VIEW_COURSE',
     'GRADE_ASSIGNMENT',
     'VIEW_ANALYTICS'
   ],
-  STUDENT: [
+  [UserRole.STUDENT]: [
     'VIEW_COURSE',
     'SUBMIT_ASSIGNMENT'
   ]
@@ -35,10 +45,15 @@ export function canPerformAction(role: UserRole, permission: Permission): boolea
 }
 
 export function getRoleHierarchy(): UserRole[] {
-  return ['ADMIN', 'INSTRUCTOR', 'STUDENT']
+  return [UserRole.ADMIN, UserRole.INSTRUCTOR, UserRole.STUDENT]
 }
 
 export function isHigherRole(role1: UserRole, role2: UserRole): boolean {
   const hierarchy = getRoleHierarchy()
   return hierarchy.indexOf(role1) < hierarchy.indexOf(role2)
+}
+
+export function hasAccessToResource(userRole: UserRole, requiredRole: UserRole): boolean {
+  const hierarchy = getRoleHierarchy()
+  return hierarchy.indexOf(userRole) <= hierarchy.indexOf(requiredRole)
 }
