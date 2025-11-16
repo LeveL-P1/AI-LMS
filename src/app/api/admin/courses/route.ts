@@ -1,4 +1,3 @@
-import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
@@ -11,7 +10,7 @@ import { ok, fail } from '@/lib/utils/api'
 export async function GET() {
 	try {
 		const adminCheck = await requireAdmin()
-		if ('response' in adminCheck) return adminCheck.response
+		if (adminCheck instanceof NextResponse) return adminCheck
 
 		// Fetch all courses with instructor and enrollment info
 		const courses = await db.course.findMany({

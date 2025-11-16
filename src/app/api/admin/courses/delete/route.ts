@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 	try {
 		const adminCheck = await requireAdmin()
 		if (adminCheck instanceof NextResponse) return adminCheck
-		const userId = adminCheck.user.id
+		const userId = adminCheck.id
 
 		// Content-Type guard
 		const contentType = request.headers.get('content-type') || ''

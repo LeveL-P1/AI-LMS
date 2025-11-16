@@ -69,7 +69,7 @@ model Enrollment {
 }
 
 model RolePermission {
-  id         String     @id
+  id         String     @id @default(cuid())
   role       UserRole
   permission Permission
 
