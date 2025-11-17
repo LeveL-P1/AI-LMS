@@ -55,7 +55,7 @@ model Course {
 }
 
 model Enrollment {
-  id        String   @id
+  id        String   @id @default(cuid())
   userId    String
   courseId  String
   status    String   @default("ACTIVE")
@@ -87,6 +87,7 @@ model User {
   lastName    String?
   imageUrl    String?
   role        UserRole      @default(STUDENT)
+  status      String        @default("ACTIVE")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   
@@ -126,8 +127,25 @@ model Chapter {
   updatedAt   DateTime @updatedAt
   
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userProgress UserProgress[]
   
   @@index([courseId], map: "idx_chapter_courseId")
+}
+
+model UserProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  chapterId   String
+  isCompleted Boolean  @default(false)
+  timeSpent   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, chapterId], map: "idx_userprogress_unique")
+  @@index([userId], map: "idx_userprogress_userId")
+  @@index([chapterId], map: "idx_userprogress_chapterId")
 }
 
 model Quiz {

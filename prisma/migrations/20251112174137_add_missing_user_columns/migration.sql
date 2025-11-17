@@ -101,9 +101,6 @@ CREATE INDEX "idx_quizattempt_quizId" ON "QuizAttempt"("quizId");
 CREATE INDEX "idx_course_isPublished" ON "Course"("isPublished");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
-
--- CreateIndex
 CREATE INDEX "idx_user_clerkId" ON "User"("clerkId");
 
 -- AddForeignKey
