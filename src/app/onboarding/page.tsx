@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/common/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/common/ui/card";
 import { GraduationCap, BookOpen, Users, Settings, ArrowRight } from "lucide-react";
+import { updateUserRole } from "./actions";
 
 const roles = [
   {
@@ -74,21 +75,22 @@ const handleRoleSelection = async () => {
         'admin': 'ADMIN'
       };
 
-      // Update user role in database and Clerk metadata
-      const response = await fetch('/api/user/role', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role: roleMap[selectedRole as keyof typeof roleMap]
-        }),
-      });
+      const roleValue = roleMap[selectedRole as keyof typeof roleMap];
+      if (!roleValue) {
+        throw new Error('Invalid role selected');
+      }
 
-      const data = await response.json();
+      // Update user role using server action
+      const result = await updateUserRole(roleValue);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update user role');
+      }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update user role');
+      // Invalidate session cache to ensure the new role is reflected
+      try {
+        await fetch('/api/auth/session', { method: 'DELETE' });
+      } catch (cacheError) {
+        console.warn('Failed to invalidate session cache:', cacheError);
       }
 
       // Redirect based on role
@@ -96,10 +98,13 @@ const handleRoleSelection = async () => {
                           selectedRole === 'instructor' ? '/dashboard/instructor' : 
                           '/dashboard/student';
       
-      router.push(redirectPath);
+      // Force a full page reload to ensure all auth state is updated
+      window.location.href = redirectPath;
     } catch (error) {
       console.error("Error updating user role:", error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      // Show a more user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update role. Please try again.';
+      alert(errorMessage);
       setLoading(false);
     }
   };

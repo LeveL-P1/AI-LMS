@@ -37,7 +37,12 @@ export default async function CourseDetailPage(props: {
 
     try {
       await db.enrollment.create({
-        data: { userId: userId, courseId, status: 'ACTIVE' },
+        data: { 
+          id: `enrollment_${userId}_${courseId}`,
+          userId: userId, 
+          courseId, 
+          status: 'ACTIVE' 
+        },
       })
       redirect(`/courses/${courseId}`)
     } catch (error) {

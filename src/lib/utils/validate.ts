@@ -15,7 +15,7 @@ export function validatePayload<T>(
     return { ok: true, data: parsed }
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      const message = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join('; ')
+      const message = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; ')
       return {
         ok: false,
         response: fail({ code: 'BAD_REQUEST', message: `Validation failed: ${message}` }, { status: 400 })

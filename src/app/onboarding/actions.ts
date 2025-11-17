@@ -1,9 +1,7 @@
 'use server'
 
 import { auth, clerkClient } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import { db } from '@/lib/prisma/prisma'
-import { ClerkProvider } from '@clerk/nextjs'
 
 export async function updateUserRole(role: string) {
   try {
@@ -32,23 +30,22 @@ export async function updateUserRole(role: string) {
 
     // Update user role in our database
     await db.user.update({
-where: {
-        email: userId
+      where: {
+        clerkId: userId
       },
       data: {
-        role: upperRole as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN'
+        role: upperRole as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
+        status: 'ACTIVE'
       }
     })
 
     console.log(`Updated user ${userId} role to ${upperRole}`)
     
-    // Redirect to appropriate dashboard based on role
-    const dashboardRoute = upperRole.toLowerCase()
-    redirect(`/dashboard/${dashboardRoute}`)
+    return { success: true, role: upperRole }
     
   } catch (error) {
     console.error('Error updating user role:', error)
-    throw error
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 
