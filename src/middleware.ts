@@ -1,73 +1,82 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { clerkMiddleware } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-// Public routes - no auth required
-const isPublicRoute = createRouteMatcher([
+// Define public routes that don't require authentication
+const publicRoutes = [
   '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/courses',
-  '/courses/(.*)',
-  '/api/courses',
-])
+  '/sign-in',
+  '/sign-up',
+  '/onboarding',
+  '/api/webhooks/clerk',
+  '/unauthorized',
+  '/404',
+  '/_next',
+  '/favicon.ico',
+  '/public',
+  '/api/trpc/(.*)'
+];
 
-// Admin routes - admin role required
-const isAdminRoute = createRouteMatcher(['/admin(.*)'])
-
-// Instructor routes - instructor or admin role required
-const isInstructorRoute = createRouteMatcher([
-  '/instructor(.*)',
-  '/dashboard/instructor(.*)',
-])
-
-// Student routes - student, instructor, or admin role required
-const isStudentRoute = createRouteMatcher([
-  '/student(.*)',
-  '/dashboard/student(.*)',
-])
+// Define protected routes and their required roles
+const protectedRoutes = [
+  { path: '/dashboard/admin', roles: ['admin'] },
+  { path: '/dashboard/instructor', roles: ['admin', 'instructor'] },
+  { path: '/dashboard/student', roles: ['admin', 'instructor', 'student'] },
+  { path: '/api/admin', roles: ['admin'] },
+  { path: '/api/instructor', roles: ['admin', 'instructor'] },
+  { path: '/api/student', roles: ['admin', 'instructor', 'student'] },
+  { path: '/courses', roles: ['admin', 'instructor', 'student'] },
+  { path: '/courses/create', roles: ['admin', 'instructor'] },
+  { path: '/settings', roles: ['admin', 'instructor', 'student'] }
+];
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims } = await auth()
+  const { userId, sessionClaims: sessionClaims } = await auth();
+  const { pathname } = req.nextUrl;
 
-  // Allow public routes
-  if (isPublicRoute(req)) {
-    return NextResponse.next()
+  // Check if the route is public
+  const isPublicRoute = publicRoutes.some(route => 
+    pathname === route || 
+    pathname.startsWith(route.replace(/\*$/, ''))
+  );
+
+  if (isPublicRoute) {
+    return NextResponse.next();
   }
 
-  // Protect all other routes - require authentication
+  // If user is not signed in, redirect to sign-in
   if (!userId) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+    const signInUrl = new URL('/sign-in', req.url);
+    signInUrl.searchParams.set('redirect_url', req.url);
+    return NextResponse.redirect(signInUrl);
   }
 
-  // Get user role from Clerk metadata
-  const userRole = ((sessionClaims?.metadata as Record<string, unknown>)?.role as string || 'STUDENT').toUpperCase()
-
-  // Check admin routes
-  if (isAdminRoute(req)) {
-    if (userRole !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url))
-    }
+  // If user is signed in and on the sign-in or sign-up page, redirect to dashboard
+  if (pathname === '/sign-in' || pathname === '/sign-up') {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
-  // Check instructor routes
-  if (isInstructorRoute(req)) {
-    if (userRole !== 'INSTRUCTOR' && userRole !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url))
-    }
+  // Check if user has access to the requested route
+  const userRole = sessionClaims?.metadata?.role?.toLowerCase() || 'student';
+  const routeConfig = protectedRoutes.find(route => 
+    pathname.startsWith(route.path)
+  );
+
+  // If no role is found, redirect to onboarding
+  if (!sessionClaims?.metadata?.role && !pathname.startsWith('/onboarding')) {
+    return NextResponse.redirect(new URL('/onboarding', req.url));
   }
 
-  // Check student routes
-  if (isStudentRoute(req)) {
-    if (!['STUDENT', 'INSTRUCTOR', 'ADMIN'].includes(userRole)) {
-      return NextResponse.redirect(new URL('/unauthorized', req.url))
-    }
+  // Check role-based access for protected routes
+  if (routeConfig && !routeConfig.roles.includes(userRole)) {
+    return NextResponse.redirect(new URL('/unauthorized', req.url));
   }
 
-  return NextResponse.next()
-})
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest))(?:.*)|api|trpc)(.*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/(api|trpc)(.*)'
   ],
-}
+};

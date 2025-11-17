@@ -9,11 +9,13 @@ import type { UserRole } from '@prisma/client'
 export async function POST(req: NextRequest) {
   try {
     const user = await currentUser()
+    console.log('Current user:', user?.id)
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { role } = await req.json()
+    console.log('Requested role:', role)
     // Accept both uppercase (ADMIN) and lowercase (admin) formats
     const normalizedRole = (role as string).toUpperCase()
     const validRoles = ['STUDENT', 'INSTRUCTOR', 'ADMIN']
@@ -22,25 +24,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
-// Ensure user exists in database by syncing from Clerk
+    console.log('Normalized role:', normalizedRole)
+
+    // Ensure user exists in database by syncing from Clerk
+    console.log('Finding user with clerkId:', user.id)
     let dbUser = await db.user.findUnique({
-      where: { email: user.emailAddresses[0]?.emailAddress },
+      where: { clerkId: user.id },
     })
 
+    console.log('Database user found:', dbUser?.id)
+
     if (!dbUser) {
+      console.log('User not found, syncing from Clerk...')
       // Sync user from Clerk to database
       dbUser = await syncUser()
       
       if (!dbUser) {
         return NextResponse.json({ error: 'Failed to sync user' }, { status: 500 })
       }
+      console.log('User synced:', dbUser.id)
     }
 
     // Update Prisma database with normalized uppercase role
+    console.log('Updating user role...')
     const updatedUser = await db.user.update({
-      where: { email: user.emailAddresses[0]?.emailAddress },
+      where: { clerkId: user.id },
       data: { role: normalizedRole as UserRole },
     })
+    console.log('User role updated:', updatedUser.role)
 
     // Update Clerk's publicMetadata with lowercase role for consistency with frontend
     try {
@@ -60,6 +71,11 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('Error updating user role:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('Error details:', errorMessage)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: errorMessage 
+    }, { status: 500 })
   }
 }

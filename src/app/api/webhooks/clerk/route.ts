@@ -2,9 +2,9 @@ import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import { db } from '@/lib/prisma/prisma'
+import { invalidateAllSessionCaches } from '@/lib/auth/session'
 
-
-type EventType = 'user.created' | 'user.updated' | '*'
+type EventType = 'user.created' | 'user.updated' | 'user.deleted' | '*'
 
 type Event = {
   data: {
@@ -13,8 +13,8 @@ type Event = {
       email_address: string
       id: string
     }>
-    first_name: string
-    last_name: string
+    first_name: string | null
+    last_name: string | null
     image_url: string
     public_metadata: {
       role?: string
@@ -70,44 +70,69 @@ export async function POST(req: NextRequest) {
 
   // Handle the webhook
   const { type, data } = evt
-  console.log(`Webhook with and ID of ${data.id} and type of ${type}`)
 
   if (type === 'user.created' || type === 'user.updated') {
     try {
-      // Get the role from public_metadata, default to STUDENT, ensure uppercase
-      const role = ((data.public_metadata?.role as string) || 'STUDENT').toUpperCase()
-      
-      // Get primary email
+      // Get email
       const email = data.email_addresses[0]?.email_address
-      
       if (!email) {
         console.error('No email found for user:', data.id)
         return new Response('No email found', { status: 400 })
       }
 
-      // Upsert user in database
+      // Get role from metadata, default to STUDENT
+      const role = ((data.public_metadata?.role as string) || 'STUDENT').toUpperCase()
+
+      // Build name
+      const name = [data.first_name, data.last_name]
+        .filter(Boolean)
+        .join(' ')
+        .trim() || null
+
+      // Upsert user with clerkId as primary identifier
       await db.user.upsert({
-        where: { email },
+        where: { clerkId: data.id },
         update: {
-          name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-          firstName: data.first_name || null,
-          lastName: data.last_name || null,
-          role: role as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
+          email,
+          name,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          imageUrl: data.image_url || null,
+          role: role as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN'
         },
         create: {
           clerkId: data.id,
           email,
-          name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-          firstName: data.first_name || null,
-          lastName: data.last_name || null,
-          role: role as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN',
-        },
+          name,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          imageUrl: data.image_url || null,
+          role: role as 'STUDENT' | 'INSTRUCTOR' | 'ADMIN'
+        }
       })
 
-      console.log(`User ${data.id} synced to database with role: ${role}`)
+      // Invalidate cache after user update
+      invalidateAllSessionCaches()
+
+      console.log(`✓ User ${data.id} synced (role: ${role})`)
     } catch (error) {
-      console.error('Error syncing user to database:', error)
+      console.error('✗ Error syncing user:', error)
       return new Response('Error syncing user', { status: 500 })
+    }
+  } else if (type === 'user.deleted') {
+    try {
+      // Delete user from database
+      await db.user.delete({
+        where: { clerkId: data.id }
+      })
+
+      // Invalidate cache
+      invalidateAllSessionCaches()
+
+      console.log(`✓ User ${data.id} deleted`)
+    } catch (error) {
+      console.error('✗ Error deleting user:', error)
+      // Don't fail on delete errors
     }
   }
 
