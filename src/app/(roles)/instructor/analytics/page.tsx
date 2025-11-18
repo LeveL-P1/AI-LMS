@@ -1,7 +1,6 @@
 import React from 'react'
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/common/ui/card'
 import { db } from '@/lib/prisma/prisma'
-import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { BarChart3, TrendingUp, Users, BookOpen, FileText } from 'lucide-react'
 

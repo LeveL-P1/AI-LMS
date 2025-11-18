@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { Button } from '@/components/common/ui/button'
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/common/ui/card'
 import { db } from '@/lib/prisma/prisma'
-import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { BookOpen, Users, FileText, BarChart3, Edit2 } from 'lucide-react'
 

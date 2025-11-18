@@ -8,111 +8,22 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model ChatMessage {
-  id         String   @id
-  chatRoomId String
-  senderId   String
-  content    String
-  createdAt  DateTime @default(now())
-  ChatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-  User       User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
-
-  @@index([chatRoomId], map: "idx_chatmessage_chatRoomId")
-  @@index([senderId], map: "idx_chatmessage_senderId")
-}
-
-model ChatRoom {
-  id          String        @id
-  courseId    String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime
-  ChatMessage ChatMessage[]
-  Course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([courseId], map: "idx_chatroom_courseId")
-}
-
 model Course {
-  id           String       @id @default(cuid())
+  id           String     @id @default(cuid())
   title        String
   description  String?
   thumbnail    String?
-  instructorId String?
-  isPublished  Boolean      @default(false)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  isPublished  Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   
-  instructor   User?        @relation(fields: [instructorId], references: [id], onDelete: SetNull)
-  chapters     Chapter[]
-  quizzes      Quiz[]
-  assignments  Assignment[]
-  enrollments  Enrollment[]
-  chatRooms    ChatRoom[]
+  chapters    Chapter[]
+  quizzes     Quiz[]
+  assignments Assignment[]
+  chatRooms   ChatRoom[]
 
-  @@index([instructorId], map: "idx_course_instructorId")
   @@index([title], map: "idx_course_title")
   @@index([isPublished], map: "idx_course_isPublished")
-}
-
-model Enrollment {
-  id        String   @id @default(cuid())
-  userId    String
-  courseId  String
-  status    String   @default("ACTIVE")
-  createdAt DateTime @default(now())
-  Course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-  @@index([courseId], map: "idx_enrollment_courseId")
-  @@index([userId], map: "idx_enrollment_userId")
-}
-
-model RolePermission {
-  id         String     @id @default(cuid())
-  role       UserRole
-  permission Permission
-
-  @@unique([role, permission])
-  @@index([permission], map: "idx_rolepermission_permission")
-  @@index([role], map: "idx_rolepermission_role")
-}
-
-model User {
-  id          String        @id @default(cuid())
-  clerkId     String        @unique
-  email       String        @unique
-  name        String?
-  firstName   String?
-  lastName    String?
-  imageUrl    String?
-  role        UserRole      @default(STUDENT)
-  status      String        @default("ACTIVE")
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  
-  courses              Course[]
-  enrollments          Enrollment[]
-  chatMessages         ChatMessage[]
-  userActions          UserAction[]
-  quizAttempts         QuizAttempt[]
-  assignmentSubmissions AssignmentSubmission[]
-
-  @@index([role], map: "idx_user_role")
-  @@index([clerkId], map: "idx_user_clerkId")
-  @@index([email], map: "idx_user_email")
-}
-
-model UserAction {
-  id         String   @id
-  userId     String
-  actionType String
-  metadata   Json?
-  createdAt  DateTime @default(now())
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([actionType], map: "idx_useraction_actionType")
-  @@index([userId], map: "idx_useraction_userId")
 }
 
 model Chapter {
@@ -127,25 +38,8 @@ model Chapter {
   updatedAt   DateTime @updatedAt
   
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  userProgress UserProgress[]
   
   @@index([courseId], map: "idx_chapter_courseId")
-}
-
-model UserProgress {
-  id          String   @id @default(cuid())
-  userId      String
-  chapterId   String
-  isCompleted Boolean  @default(false)
-  timeSpent   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, chapterId], map: "idx_userprogress_unique")
-  @@index([userId], map: "idx_userprogress_userId")
-  @@index([chapterId], map: "idx_userprogress_chapterId")
 }
 
 model Quiz {
@@ -160,7 +54,6 @@ model Quiz {
   
   course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   questions     QuizQuestion[]
-  attempts      QuizAttempt[]
   
   @@index([courseId], map: "idx_quiz_courseId")
   @@index([isPublished], map: "idx_quiz_isPublished")
@@ -181,21 +74,6 @@ model QuizQuestion {
   @@index([quizId], map: "idx_quizquestion_quizId")
 }
 
-model QuizAttempt {
-  id        String   @id @default(cuid())
-  userId    String
-  quizId    String
-  score     Float
-  answers   Json
-  createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  
-  @@index([userId], map: "idx_quizattempt_userId")
-  @@index([quizId], map: "idx_quizattempt_quizId")
-}
-
 model Assignment {
   id          String   @id @default(cuid())
   courseId    String
@@ -207,43 +85,29 @@ model Assignment {
   updatedAt   DateTime @updatedAt
   
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  submissions AssignmentSubmission[]
   
   @@index([courseId], map: "idx_assignment_courseId")
 }
 
-model AssignmentSubmission {
-  id           String   @id @default(cuid())
-  assignmentId String
-  userId       String
-  fileUrl      String?
-  content      String?
-  score        Float?
-  feedback     String?
-  submittedAt  DateTime @default(now())
-  gradedAt     DateTime?
-  
-  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([assignmentId, userId], map: "idx_submission_unique")
-  @@index([userId], map: "idx_submission_userId")
-  @@index([assignmentId], map: "idx_submission_assignmentId")
+model ChatRoom {
+  id          String       @id
+  courseId    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  messages    ChatMessage[]
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId], map: "idx_chatroom_courseId")
 }
 
-enum Permission {
-  CREATE_COURSE
-  EDIT_COURSE
-  DELETE_COURSE
-  VIEW_COURSE
-  SUBMIT_ASSIGNMENT
-  GRADE_ASSIGNMENT
-  VIEW_ANALYTICS
-  MANAGE_USERS
-}
+model ChatMessage {
+  id         String   @id
+  chatRoomId String
+  senderId   String
+  content    String
+  createdAt  DateTime @default(now())
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
 
-enum UserRole {
-  ADMIN
-  INSTRUCTOR
-  STUDENT
+  @@index([chatRoomId], map: "idx_chatmessage_chatRoomId")
+  @@index([senderId], map: "idx_chatmessage_senderId")
 }

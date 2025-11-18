@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { useUser } from '@/hooks/use-user';
 import { Navbar } from '@/components/layout/navbar';
 import { Sidebar } from '@/components/layout/sidebar';
 import { redirect } from 'next/navigation';

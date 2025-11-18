@@ -2,17 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Users,
-  BarChart3,
-  Settings,
-  LogOut,
-  GraduationCap,
-} from "lucide-react";
+import {BookOpen, Users, BarChart3, Settings, LogOut, GraduationCap, } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/common/ui/button";
-import { SignOutButton } from "@clerk/nextjs";
 import { UserRole } from "@/types";
 
 interface SidebarProps {
@@ -82,12 +74,7 @@ export function Sidebar({ userRole }: SidebarProps) {
 
       {/* Sign out */}
       <div className="border-t p-4">
-        <SignOutButton redirectUrl="/">
-          <Button variant="outline" className="w-full justify-start gap-3">
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
-        </SignOutButton>
+       
       </div>
     </aside>
   );

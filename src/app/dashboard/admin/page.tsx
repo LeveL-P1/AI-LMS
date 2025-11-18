@@ -1,4 +1,3 @@
-import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/prisma/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/common/ui/card'

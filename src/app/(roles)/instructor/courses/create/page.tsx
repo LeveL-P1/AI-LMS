@@ -4,7 +4,6 @@ import { Button } from '@/components/common/ui/button'
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/common/ui/card'
 import { Input } from '@/components/common/ui/input'
 import { db } from '@/lib/prisma/prisma'
-import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
 export default async function CreateCoursePage() {

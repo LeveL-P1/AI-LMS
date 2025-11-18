@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import "./globals.css";
+import { Sidebar } from '@/components/layout/sidebar'
+import { Navbar } from '@/components/layout/navbar'
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,10 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} antialiased transition-colors duration-300`}>
           <div className="min-h-screen w-full bg-[#c59d6d] relative">
+            <Navbar />
+
             {/* Light mode background */}
             <div
               className="absolute inset-0 z-0"
@@ -71,7 +73,6 @@ export default function RootLayout({
           </div>
         </body>
       </html>
-    </ClerkProvider>
   );
 }
 
