@@ -13,13 +13,11 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.33.3",
     "@prisma/client": "^6.12.0",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
-    "@supabase/supabase-js": "^2.45.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
@@ -30,7 +28,6 @@
     "prisma": "^6.12.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "svix": "^1.77.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
