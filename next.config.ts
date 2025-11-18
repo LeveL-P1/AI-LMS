@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.supabase.co",
       },
-      {
-        protocol: "https",
-        hostname: "**.clerk.com",
-      },
     ],
   },
   serverExternalPackages: ["@prisma/client"],
