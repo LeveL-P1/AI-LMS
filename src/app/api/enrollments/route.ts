@@ -2,7 +2,6 @@ import { NextRequest } from 'next/server'
 import { db } from '@/lib/prisma/prisma'
 import { successResponse, errorResponse, serverErrorResponse, validationErrorResponse, unauthorizedResponse } from '@/lib/api-response'
 import { enrollmentSchema, paginationSchema } from '@/lib/validations'
-import { auth } from '@clerk/nextjs/server'
 
 export async function GET(request: NextRequest) {
 	try {
