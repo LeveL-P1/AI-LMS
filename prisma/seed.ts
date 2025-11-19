@@ -1,136 +1,210 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { PrismaClient, UserRole, Permission } from "@prisma/client";
+import { PrismaClient, UserRole, type Course } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("🌱 Starting database seeding...");
+const hashPassword = (value: string) => bcrypt.hash(value, 11);
 
-  // Clean existing data in a safe order (dependents first)
-  await prisma.chatMessage.deleteMany();
-  await prisma.chatRoom.deleteMany();
+async function main() {
+  console.log("🌱 Resetting schema...");
+  await prisma.session.deleteMany();
   await prisma.enrollment.deleteMany();
+  await prisma.chapter.deleteMany();
   await prisma.course.deleteMany();
-  await prisma.userAction.deleteMany();
-  await prisma.rolePermission.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log("🧹 Cleaned existing data");
+  const [adminHash, instructorHash, studentHash] = await Promise.all([
+    hashPassword("admin.supernova"),
+    hashPassword("teach.studio"),
+    hashPassword("learn.prototype"),
+  ]);
 
-  // Seed role -> permission matrix (small subset for demo)
-  const rolePermissions = [
-    { role: UserRole.ADMIN, permission: Permission.MANAGE_USERS },
-    { role: UserRole.ADMIN, permission: Permission.VIEW_ANALYTICS },
-    { role: UserRole.INSTRUCTOR, permission: Permission.CREATE_COURSE },
-    { role: UserRole.INSTRUCTOR, permission: Permission.EDIT_COURSE },
-    { role: UserRole.STUDENT, permission: Permission.VIEW_COURSE },
-  ];
-
-  for (const rp of rolePermissions) {
-    await prisma.rolePermission.create({ data: rp });
-  }
-
-  console.log("🔐 Seeded role permissions");
-
-  // Create users
-  // create an admin, several instructors and many students
-  await prisma.user.create({
-    data: { clerkId: "clerk_admin", email: "admin@learndash.com", name: "System Administrator", role: UserRole.ADMIN },
+  const admin = await prisma.user.create({
+    data: {
+      email: "nova@synapse.lms",
+      name: "Nova Admin",
+      passwordHash: adminHash,
+      role: UserRole.ADMIN,
+      headline: "Orchestrates learning systems",
+    },
   });
 
   const instructors = await Promise.all([
-    prisma.user.create({ data: { clerkId: "clerk_alice", email: "alice.instructor@learndash.com", name: "Alice Instructor", role: UserRole.INSTRUCTOR } }),
-    prisma.user.create({ data: { clerkId: "clerk_bob", email: "bob.instructor@learndash.com", name: "Bob Instructor", role: UserRole.INSTRUCTOR } }),
-    prisma.user.create({ data: { clerkId: "clerk_carla", email: "carla.instructor@learndash.com", name: "Carla Instructor", role: UserRole.INSTRUCTOR } }),
+    prisma.user.create({
+      data: {
+        email: "atlas@studio.ai",
+        name: "Atlas Rivera",
+        passwordHash: instructorHash,
+        role: UserRole.INSTRUCTOR,
+        headline: "Proto-instructor for creative tech",
+      },
+    }),
+    prisma.user.create({
+      data: {
+        email: "sera@studio.ai",
+        name: "Sera Bloom",
+        passwordHash: instructorHash,
+        role: UserRole.INSTRUCTOR,
+        headline: "Systems designer & researcher",
+      },
+    }),
   ]);
 
-  const students = await Promise.all([
-    prisma.user.create({ data: { clerkId: "clerk_s1", email: "student1@learndash.com", name: "Student One", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s2", email: "student2@learndash.com", name: "Student Two", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s3", email: "student3@learndash.com", name: "Student Three", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s4", email: "student4@learndash.com", name: "Student Four", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s5", email: "student5@learndash.com", name: "Student Five", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s6", email: "student6@learndash.com", name: "Student Six", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s7", email: "student7@learndash.com", name: "Student Seven", role: UserRole.STUDENT } }),
-    prisma.user.create({ data: { clerkId: "clerk_s8", email: "student8@learndash.com", name: "Student Eight", role: UserRole.STUDENT } }),
-  ]);
+  const students = await Promise.all(
+    ["Kai", "Mira", "Harper", "Rowan", "Iris", "Leo"].map((name, index) =>
+      prisma.user.create({
+        data: {
+          email: `${name.toLowerCase()}@learners.space`,
+          name: `${name} Learner`,
+          passwordHash: studentHash,
+          role: UserRole.STUDENT,
+          headline: index % 2 === 0 ? "Frontier builder" : "Curious explorer",
+        },
+      })
+    )
+  );
 
-  console.log("👥 Created users");
+  console.log("👥 Seeded persona set");
 
-  // Create multiple demo courses and assign different instructors
-  const course1 = await prisma.course.create({ data: { title: "Intro to Web Development", description: "A gentle introduction to HTML, CSS and JavaScript", instructorId: instructors[0].id } });
-  const course2 = await prisma.course.create({ data: { title: "Data Fundamentals", description: "Basic data literacy and manipulation", instructorId: instructors[0].id } });
-  const course3 = await prisma.course.create({ data: { title: "React Basics", description: "Learn React and build components", instructorId: instructors[1].id } });
-  const course4 = await prisma.course.create({ data: { title: "Node.js APIs", description: "Build production-ready APIs with Node.js", instructorId: instructors[1].id } });
-  const course5 = await prisma.course.create({ data: { title: "Machine Learning Intro", description: "Intro to ML concepts and workflows", instructorId: instructors[2].id } });
-  const course6 = await prisma.course.create({ data: { title: "Mobile Apps with React Native", description: "Cross-platform mobile development", instructorId: instructors[2].id } });
+  const coursePayloads = [
+    {
+      title: "Neural Product Thinking",
+      slug: "neural-product-thinking",
+      tagline: "Design adaptive flows with neural patterns",
+      description:
+        "Layer AI-native heuristics into product decisions. Explore systems inspired by hyve.system and p5 generative artistry.",
+      coverImage:
+        "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1400&q=80",
+      difficulty: "Advanced",
+      duration: 240,
+      isFeatured: true,
+      instructorId: instructors[0].id,
+      chapters: {
+        create: [
+          {
+            title: "Sensing Signals",
+            summary: "Map qualitative insight into structured data cues.",
+            position: 1,
+            content: {
+              type: "canvas",
+              steps: ["field notebook", "system mapping", "canvas critique"],
+            },
+          },
+          {
+            title: "Orchestrating Agents",
+            summary: "Prototype multi-agent loops that stay in sync.",
+            position: 2,
+            content: {
+              type: "lab",
+              kit: ["autonomous briefs", "ethics pass"],
+            },
+          },
+        ],
+      },
+    },
+    {
+      title: "Sensory Storytelling",
+      slug: "sensory-storytelling",
+      tagline: "Blend motion, typography, and micro-soundscapes",
+      description:
+        "A cinematic workshop for crafting pitch decks and onboarding flows referencing sensory brands like trae.ai.",
+      coverImage:
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80",
+      difficulty: "Intermediate",
+      duration: 180,
+      instructorId: instructors[1].id,
+      chapters: {
+        create: [
+          {
+            title: "Audio-reactive grids",
+            summary: "Translate beats into fluid layouts.",
+            position: 1,
+            content: {
+              type: "stories",
+              references: ["trae.ai footer", "a24 motion idents"],
+            },
+          },
+          {
+            title: "Point-of-view narratives",
+            summary: "Write scripts that guide holographic journeys.",
+            position: 2,
+            content: {
+              type: "script",
+              beats: ["spark", "tension", "resolution"],
+            },
+          },
+        ],
+      },
+    },
+    {
+      title: "Adaptive Learning Ops",
+      slug: "adaptive-learning-ops",
+      tagline: "Automate cohorts, nudges, and feedback loops",
+      description:
+        "Operational blueprint for teams deploying AI-first academies—balanced between rigor and creative energy.",
+      coverImage:
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80",
+      difficulty: "Beginner",
+      duration: 120,
+      instructorId: instructors[0].id,
+      chapters: {
+        create: [
+          {
+            title: "Blueprint with Figma tokens",
+            summary: "Translate rituals into reusable tiles.",
+            position: 1,
+            content: {
+              type: "process",
+              stack: ["Linear", "Notion", "Supabase"],
+            },
+          },
+        ],
+      },
+    },
+  ];
 
-  console.log("📚 Created courses");
+  const courses: Course[] = [];
+  for (const payload of coursePayloads) {
+    const course = await prisma.course.create({ data: payload });
+    courses.push(course);
+  }
 
+  console.log("📚 Courses & chapters online");
 
-  // Enroll students across courses with some randomness
-  const allCourses = [course1, course2, course3, course4, course5, course6];
-  const enrollmentPromises: Promise<any>[] = [];
-  for (const s of students) {
-    // Each student enrolls in 2-4 random courses
-    const count = 2 + Math.floor(Math.random() * 3);
-    const shuffled = allCourses.sort(() => 0.5 - Math.random());
-    for (let i = 0; i < count; i++) {
-      enrollmentPromises.push(prisma.enrollment.create({ data: { id: `enroll_${s.id}_${shuffled[i].id}`, userId: s.id, courseId: shuffled[i].id, status: 'ACTIVE' } }));
+  for (const learner of students) {
+    const picks = courses
+      .slice()
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+    for (const course of picks) {
+      await prisma.enrollment.create({
+        data: {
+          userId: learner.id,
+          courseId: course.id,
+          progress: Math.floor(Math.random() * 70),
+          lastAccessed: new Date(Date.now() - Math.random() * 10 * 86400000),
+        },
+      });
     }
   }
-  await Promise.all(enrollmentPromises);
 
-  console.log("✅ Created enrollments");
+  console.log("🔁 Enrollments mapped");
 
-  // Create chat rooms and messages for a subset of courses
-  const sampleCourses = allCourses.slice(0, 4);
-  for (const c of sampleCourses) {
-    const room = await prisma.chatRoom.create({ data: { id: `room_${c.id}`, courseId: c.id, updatedAt: new Date() } });
-    // pick a random instructor and a random student for messages
-    const randInstructor = instructors[Math.floor(Math.random() * instructors.length)];
-    const randStudent = students[Math.floor(Math.random() * students.length)];
-    await prisma.chatMessage.createMany({
-      data: [
-        { id: `msg_${room.id}_1`, chatRoomId: room.id, senderId: randInstructor.id, content: "Welcome to the course!" },
-        { id: `msg_${room.id}_2`, chatRoomId: room.id, senderId: randStudent.id, content: "Excited to learn." },
-      ],
-    });
-  }
+  const [userCount, courseCount] = await Promise.all([
+    prisma.user.count(),
+    prisma.course.count(),
+  ]);
 
-  console.log("💬 Created chat room and messages");
-
-  // Create a few user actions for analytics/demo
-  // Create some user actions using random users
-  const actionPromises: Promise<any>[] = [];
-  for (let i = 0; i < 10; i++) {
-    const acting = Math.random() < 0.6 ? students[Math.floor(Math.random() * students.length)] : instructors[Math.floor(Math.random() * instructors.length)];
-    const actionType = Math.random() < 0.5 ? "VIEWED_COURSE" : "STARTED_LESSON";
-    const meta = { courseId: allCourses[Math.floor(Math.random() * allCourses.length)].id };
-    actionPromises.push(prisma.userAction.create({ data: { id: `action_${acting.id}_${i}`, userId: acting.id, actionType, metadata: meta } }));
-  }
-  await Promise.all(actionPromises);
-
-  console.log("📈 Created user actions");
-
-  // Summary
-  const userCount = await prisma.user.count();
-  const courseCount = await prisma.course.count();
-  const enrollmentCount = await prisma.enrollment.count();
-  const chatRoomCount = await prisma.chatRoom.count();
-  const messageCount = await prisma.chatMessage.count();
-
-  console.log(`\n📊 SEED SUMMARY:\n- Users: ${userCount}\n- Courses: ${courseCount}\n- Enrollments: ${enrollmentCount}\n- Chat Rooms: ${chatRoomCount}\n- Messages: ${messageCount}\n`);
+  console.log(
+    `\n✨ Seed complete:\n   users: ${userCount}\n   courses: ${courseCount}\n   admin access: ${admin.email} / admin.supernova\n`
+  );
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Error during seeding:", e);
+  .catch((error) => {
+    console.error("❌ Seeding failed", error);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-
-

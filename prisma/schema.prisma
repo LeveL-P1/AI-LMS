@@ -8,106 +8,96 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Course {
-  id           String     @id @default(cuid())
-  title        String
-  description  String?
-  thumbnail    String?
-  isPublished  Boolean    @default(false)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  
-  chapters    Chapter[]
-  quizzes     Quiz[]
-  assignments Assignment[]
-  chatRooms   ChatRoom[]
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
 
-  @@index([title], map: "idx_course_title")
-  @@index([isPublished], map: "idx_course_isPublished")
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  name         String
+  passwordHash String
+  role         UserRole    @default(STUDENT)
+  status       UserStatus  @default(ACTIVE)
+  avatarUrl    String?
+  headline     String?
+  bio          String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  instructorCourses Course[]    @relation("InstructorCourses")
+  enrollments       Enrollment[]
+  sessions          Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
+
+model Course {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  tagline      String?
+  description  String
+  coverImage   String?
+  difficulty   String?
+  duration     Int?
+  isFeatured   Boolean   @default(false)
+  isPublished  Boolean   @default(true)
+  instructorId String?
+  instructor   User?     @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  enrollments Enrollment[]
+  chapters    Chapter[]
+
+  @@index([isFeatured])
+  @@index([isPublished])
 }
 
 model Chapter {
-  id          String   @id @default(cuid())
-  courseId    String
-  title       String
-  description String?
-  content     String?
-  videoUrl    String?
-  position    Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  @@index([courseId], map: "idx_chapter_courseId")
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  summary   String?
+  content   Json?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, position])
 }
 
-model Quiz {
-  id            String   @id @default(cuid())
-  courseId      String
-  title         String
-  description   String?
-  passingScore  Float    @default(70)
-  isPublished   Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  questions     QuizQuestion[]
-  
-  @@index([courseId], map: "idx_quiz_courseId")
-  @@index([isPublished], map: "idx_quiz_isPublished")
-}
+model Enrollment {
+  id           String    @id @default(cuid())
+  userId       String
+  courseId     String
+  progress     Int       @default(0)
+  lastAccessed DateTime?
 
-model QuizQuestion {
-  id              String   @id @default(cuid())
-  quizId          String
-  question        String
-  options         String[]
-  correctAnswer   String
-  explanation     String?
-  position        Int      @default(0)
-  createdAt       DateTime @default(now())
-  
-  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  
-  @@index([quizId], map: "idx_quizquestion_quizId")
-}
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-model Assignment {
-  id          String   @id @default(cuid())
-  courseId    String
-  title       String
-  description String?
-  dueDate     DateTime?
-  maxScore    Float    @default(100)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  @@index([courseId], map: "idx_assignment_courseId")
-}
-
-model ChatRoom {
-  id          String       @id
-  courseId    String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime
-  messages    ChatMessage[]
-  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([courseId], map: "idx_chatroom_courseId")
-}
-
-model ChatMessage {
-  id         String   @id
-  chatRoomId String
-  senderId   String
-  content    String
-  createdAt  DateTime @default(now())
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-
-  @@index([chatRoomId], map: "idx_chatmessage_chatRoomId")
-  @@index([senderId], map: "idx_chatmessage_senderId")
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([userId])
 }
