@@ -1,13 +1,11 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { runWithPrisma } from './utils/runWithPrisma';
 
 async function fixExistingUsers() {
-  try {
+  await runWithPrisma(async prisma => {
     console.log('Checking existing users...');
     const users = await prisma.user.findMany();
     console.log(`Found ${users.length} existing users`);
-    
+
     if (users.length > 0) {
       console.log('Updating existing users with temporary clerkId values...');
       for (const user of users) {
@@ -19,13 +17,12 @@ async function fixExistingUsers() {
       }
       console.log('All users updated successfully');
     }
-    
+
     console.log('Database is ready for migration');
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
-    await prisma.$disconnect();
-  }
+  });
 }
 
-fixExistingUsers();
+fixExistingUsers().catch(error => {
+  console.error('Error running fix-users script:', error);
+  process.exit(1);
+});

@@ -20,6 +20,23 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Scripts
+
+All ad-hoc database utilities live in `scripts/` and run with [tsx](https://github.com/esbuild-kit/tsx) so they can stay in TypeScript while talking directly to Prisma:
+
+```bash
+# Print a full snapshot of the first course (chapters/quizzes/assignments)
+npx tsx scripts/printCourses.ts
+
+# Dump the first quiz with its questions and parent course
+npx tsx scripts/printFirstQuiz.ts
+
+# Backfill temporary clerk ids in existing users
+npx tsx scripts/fix-users.ts
+```
+
+Shared Prisma bootstrapping logic lives in `scripts/utils/runWithPrisma.ts`, so new scripts can simply import it to get a fully managed `PrismaClient`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
