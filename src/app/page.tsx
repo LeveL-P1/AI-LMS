@@ -1,22 +1,27 @@
 
-import Header from "@/components/layout/header";
-import Hero from "@/components/landing/hero";
-import Features from "@/components/landing/features";
-import Pricing from "@/components/landing/pricing";
-import Footer from "@/components/layout/footer";
+import { Suspense } from "react";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { Hero } from "@/components/landing/hero";
+import { ExperienceGrid } from "@/components/landing/experience";
+import { CurriculumShowcase } from "@/components/landing/curriculum";
+import { StudioCTA } from "@/components/landing/studio-cta";
 
 export default function HomePage() {
   return (
-    <>
-    
-      <Header />
+    <div className="bg-canvas text-white">
+      <SiteHeader />
+
       <main>
         <Hero />
-        <Features />
-        <Pricing />
+        <ExperienceGrid />
+        <Suspense fallback={<div className="py-24 text-center text-white/50">Loading courses…</div>}>
+          <CurriculumShowcase />
+        </Suspense>
+        <StudioCTA />
       </main>
-      <Footer />
-    </>
+
+      <SiteFooter />
+    </div>
   );
 }
-

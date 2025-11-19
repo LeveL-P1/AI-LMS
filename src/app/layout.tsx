@@ -1,23 +1,31 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Link from 'next/link';
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from '@/components/layout/sidebar'
-import { Navbar } from '@/components/layout/navbar'
 
-
-const inter = Inter({ subsets: ["latin"] });
+const font = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "SkillSyncAI - AI-Powered Learning Platform",
-  description: "Master any skill with personalized AI-powered learning paths, interactive quizzes, and real-time progress tracking.",
-  keywords: "online learning, AI education, courses, LMS, learning management",
-  authors: [{ name: "Level-P1" }],
+  title: "Synapse LMS · Adaptive Learning for Teams",
+  description:
+    "An experiential AI-native LMS with cinematic UI, crafted with inspiration from hyve.system, p5.js visuals, and trae.ai micro-interactions.",
+  keywords: [
+    "AI LMS",
+    "learning platform",
+    "digital academy",
+    "hyve system inspired",
+    "p5 generative UI",
+  ],
   openGraph: {
-    title: "SkillSyncAI - AI-Powered Learning Platform",
-    description: "Transform your learning experience with AI-powered personalization",
+    title: "Synapse LMS",
+    description:
+      "Blend of expressive creative-tech aesthetics and a pragmatic learning workflow.",
     type: "website",
   },
+  metadataBase: new URL("https://synapse.local"),
 };
 
 export default function RootLayout({
@@ -27,67 +35,29 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.className} antialiased transition-colors duration-300`}>
-          <div className="min-h-screen w-full bg-[#c59d6d] relative">
-            <Navbar />
-
-            {/* Light mode background */}
+      <body className={`${font.className} bg-canvas text-foreground`}>
+        <div className="relative min-h-screen overflow-hidden">
+          <div className="pointer-events-none fixed inset-0">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,#3B82F680_0%,transparent_45%),radial-gradient(circle_at_80%_0%,#A855F780_0%,transparent_40%),radial-gradient(circle_at_50%_80%,#EC489980_0%,transparent_45%)] blur-[80px]" />
             <div
-              className="absolute inset-0 z-0"
+              className="absolute inset-0 opacity-60 mix-blend-screen"
               style={{
-                backgroundImage: `
-                  linear-gradient(120deg, #fbbf24 0%, #f472b6 40%, #60a5fa 70%, #34d399 100%),
-                  radial-gradient(circle at 60% 30%, rgba(255, 255, 255, 0.8) 0%, transparent 60%),
-                  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.35) 0%, transparent 60%),
-                  radial-gradient(circle at 20% 60%, rgba(59, 130, 246, 0.25) 0%, transparent 55%),
-                  radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.18) 0%, transparent 70%),
-                  repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0px, rgba(255, 255, 255, 0.12) 2px, transparent 2px, transparent 8px)
-                `,
-                backgroundBlendMode: "screen, lighten, lighten, lighten, lighten, normal",
-                backgroundSize: "100% 100%, 80% 80%, 90% 90%, 100% 100%, 100% 100%, 40px 40px",
-                backgroundPosition: "center, 60% 20%, 80% 80%, 20% 60%, 50% 0%, 0 0",
+                backgroundImage:
+                  "linear-gradient(120deg, rgba(15,23,42,.65), transparent 60%), repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 60px)",
               }}
             />
-
-            {/* Dark mode background */}
             <div
-              className="absolute inset-0 z-0 dark-mode-bg opacity-0 transition-opacity duration-300"
+              className="absolute inset-0 opacity-20"
               style={{
-                background: "#000000",
-                backgroundImage: `
-                  radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
-                  radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
-                  radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
-                `,
-                backgroundSize: "20px 20px, 30px 30px, 25px 25px",
-                backgroundPosition: "0 0, 10px 10px, 15px 5px",
+                backgroundImage:
+                  "radial-gradient(circle at 30% 30%, #fff 0.5px, transparent 0)",
+                backgroundSize: "120px 120px",
               }}
             />
-
-            
-
-            {/* Content */}
-            <div className="relative z-10 font-sans">
-              {children}
-            </div>
           </div>
-        </body>
-      </html>
+          <div className="relative z-10">{children}</div>
+        </div>
+      </body>
+    </html>
   );
 }
-
-/*
-
-  <div
-    className="absolute inset-0 z-0"
-    style={{
-      backgroundImage: `
-        radial-gradient(125% 125% at 50% 10%, #ffffff 40%, #14b8a6 100%)
-      `,
-      backgroundSize: "100% 100%",
-    }}
-  />
-</div>
-
-*/
-

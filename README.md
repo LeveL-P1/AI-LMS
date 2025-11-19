@@ -1,53 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Synapse LMS
 
-## Getting Started
+A cinematic learning platform inspired by hyve.system, p5.js sketches, trae.ai choreography, and a splash of A24 mood. The repo now ships with:
 
-First, run the development server:
+- A clean Prisma schema featuring local email/password auth, session tokens, and minimal Course/Chapter/Enrollment models.
+- Cookie-based authentication with `/api/auth/signin`, `/api/auth/signup`, `/api/auth/signout`, plus a reusable `getCurrentUser()` helper.
+- Landing, auth, and dashboard experiences redesigned with glassmorphism, gradient grids, and tactile typography.
+
+### Getting started
 
 ```bash
+npm install
+npx prisma migrate dev --name init_synapse
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The development server lives at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Local auth seeds
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Role    | Email               | Password           |
+|---------|--------------------|--------------------|
+| Admin   | nova@synapse.lms   | admin.supernova    |
+| Instructor | atlas@studio.ai | teach.studio       |
+| Student | kai@learners.space | learn.prototype    |
 
-## Scripts
+Update or add personas by editing `prisma/seed.ts`.
 
-All ad-hoc database utilities live in `scripts/` and run with [tsx](https://github.com/esbuild-kit/tsx) so they can stay in TypeScript while talking directly to Prisma:
+### Project layout
 
-```bash
-# Print a full snapshot of the first course (chapters/quizzes/assignments)
-npx tsx scripts/printCourses.ts
+- `src/lib/auth` – password hashing, zod validators, and session helpers (future Supabase swap can hook here).
+- `src/app/api/auth/*` – JSON endpoints responsible for issuing/clearing HTTP-only cookies.
+- `src/components/landing/*` – hero, experience grid, curriculum showcase, and CTA inspired by hyve.system + p5.js.
+- `src/app/dashboard/page.tsx` – protected area that redirects unauthenticated visitors server-side.
+- `docs/architecture.md` – quick architectural notes.
 
-# Dump the first quiz with its questions and parent course
-npx tsx scripts/printFirstQuiz.ts
+### Tooling
 
-# Backfill temporary clerk ids in existing users
-npx tsx scripts/fix-users.ts
-```
-
-Shared Prisma bootstrapping logic lives in `scripts/utils/runWithPrisma.ts`, so new scripts can simply import it to get a fully managed `PrismaClient`.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 14 App Router
+- Prisma + PostgreSQL
+- TailwindCSS with custom gradients
+- bcryptjs for password hashing

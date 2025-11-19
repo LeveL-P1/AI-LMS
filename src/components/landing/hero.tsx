@@ -1,160 +1,43 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
-
-import { Button } from "@/components/common/ui/button";
-import { ArrowRight, Play, Sparkles, Users, BookOpen, Trophy } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { Button } from "@/components/common/ui/button";
 
-export default function Hero() {
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  const staggerContainer = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
+export function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="relative container mx-auto px-4 py-24 sm:py-32">
-        <motion.div 
-          className="flex flex-col items-center text-center space-y-8"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Badge */}
-          <motion.div 
-            variants={fadeInUp}
-            className="inline-flex items-center gap-2 rounded-full border bg-background/60 backdrop-blur-sm px-4 py-2 text-sm text-muted-foreground"
+    <section className="relative overflow-hidden py-24">
+      <div className="absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-300 opacity-40 blur-3xl" />
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 text-center">
+        <p className="text-xs uppercase tracking-[0.6em] text-white/60">hyve.system energy</p>
+        <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-6xl">
+          Where cinematic learning journeys meet operational rigor.
+        </h1>
+        <p className="text-lg text-white/70 sm:text-xl">
+          Inspired by hyve.system, p5.js sketches, and motion cues from trae.ai, Synapse LMS is
+          the studio-grade home for AI-native academies.
+        </p>
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Button asChild size="lg" className="bg-white text-black hover:bg-white/90">
+            <Link href="/sign-up">Design my cohort</Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10"
           >
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span>AI-Powered Learning Experience</span>
-          </motion.div>
-
-          {/* Main heading */}
-          <motion.div variants={fadeInUp} className="space-y-4 max-w-4xl">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl">
-              <motion.span 
-                className="block"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                Master Any Skill with
-              </motion.span>
-              <motion.span 
-                className="block bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text "
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                AI-Powered Learning
-              </motion.span>
-            </h1>
-            <motion.p 
-              className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl"
-              variants={fadeInUp}
-            >
-             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Necessitatibus mollitia quibusdam consequatur.
-            </motion.p>
-          </motion.div>
-
-          {/* CTA Buttons */}
-          <motion.div 
-            variants={fadeInUp}
-            className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button size="lg" className="text-lg px-8" asChild>
-                <Link href="/sign-up">
-                  Start Learning Free
-                  <motion.div
-                    initial={{ x: 0 }}
-                    whileHover={{ x: 5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  >
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </motion.div>
-                </Link>
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" size="lg" className="text-lg px-8">
-                <Play className="mr-2 h-5 w-5" />
-                Watch Demo
-              </Button>
-            </motion.div>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div 
-            variants={fadeInUp}
-            className="flex flex-wrap justify-center gap-8 pt-8 text-center"
-          >
-            {[
-              { icon: Users, value: "10K+", label: "Active Students" },
-              { icon: BookOpen, value: "500+", label: "Expert Courses" },
-              { icon: Trophy, value: "95%", label: "Success Rate" }
-            ].map((stat, index) => (
-              <motion.div 
-                key={index}
-                className="flex items-center gap-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                  <stat.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="text-left">
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Trust indicators */}
-          <motion.div 
-            variants={fadeInUp}
-            className="pt-8"
-          >
-            <motion.p 
-              className="text-sm text-muted-foreground mb-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-            >
-              Trusted by learners from
-            </motion.p>
-            <motion.div 
-              className="flex flex-wrap justify-center items-center gap-6 opacity-60"
-              variants={staggerContainer}
-            >
-              {["Google", "Microsoft", "Apple", "Netflix", "Spotify"].map((company, index) => (
-                <motion.div 
-                  key={company}
-                  className="text-lg font-semibold hover:opacity-100 transition-opacity cursor-default"
-                  variants={fadeInUp}
-                  whileHover={{ scale: 1.1 }}
-                >
-                  {company}
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </motion.div>
+            <Link href="/sign-in">I already have access</Link>
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-6 rounded-3xl border border-white/5 bg-white/5 p-6 text-left text-white/80 md:grid-cols-4">
+          {["Adaptive cohorts", "Generative briefs", "Pulse analytics", "Studio rituals"].map(
+            (item) => (
+              <div key={item}>
+                <p className="text-sm uppercase tracking-[0.3em] text-white/40">Module</p>
+                <p className="text-lg font-medium text-white">{item}</p>
+              </div>
+            )
+          )}
+        </div>
       </div>
     </section>
   );
 }
-
