@@ -3,36 +3,39 @@ import { Button } from "@/components/common/ui/button";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden py-24">
-      <div className="absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-300 opacity-40 blur-3xl" />
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 text-center">
-        <p className="text-xs uppercase tracking-[0.6em] text-white/60">hyve.system energy</p>
-        <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-6xl">
-          Where cinematic learning journeys meet operational rigor.
-        </h1>
-        <p className="text-lg text-white/70 sm:text-xl">
-          Inspired by hyve.system, p5.js sketches, and motion cues from trae.ai, Synapse LMS is
-          the studio-grade home for AI-native academies.
-        </p>
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button asChild size="lg" className="bg-white text-black hover:bg-white/90">
-            <Link href="/sign-up">Design my cohort</Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="border-white/30 text-white hover:bg-white/10"
-          >
-            <Link href="/sign-in">I already have access</Link>
-          </Button>
+    <section className="relative overflow-hidden py-24 sm:py-32 md:py-40">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="text-7xl font-bold tracking-tight text-black sm:text-8xl md:text-9xl lg:text-[10rem] leading-[0.9]">
+            Build better
+            <br />
+            learning experiences
+          </h1>
+          <p className="mx-auto mt-8 max-w-2xl text-xl text-gray-600 sm:text-2xl md:text-3xl leading-relaxed">
+            The modern learning management system designed for AI-native academies and cinematic learning journeys.
+          </p>
+          <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-4">
+            <Button asChild size="lg" className="bg-black text-white hover:bg-gray-900 h-14 px-10 text-base font-medium rounded-full">
+              <Link href="/sign-up">Get started</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-gray-300 text-gray-900 hover:bg-gray-50 h-14 px-10 text-base font-medium rounded-full"
+            >
+              <Link href="/sign-in">Sign in</Link>
+            </Button>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 rounded-3xl border border-white/5 bg-white/5 p-6 text-left text-white/80 md:grid-cols-4">
-          {["Adaptive cohorts", "Generative briefs", "Pulse analytics", "Studio rituals"].map(
+        <div className="mx-auto mt-24 grid w-full max-w-6xl grid-cols-2 gap-12 border-t border-gray-200 pt-16 text-left sm:grid-cols-4">
+          {["Adaptive cohorts", "AI-powered", "Real-time analytics", "Studio tools"].map(
             (item) => (
-              <div key={item}>
-                <p className="text-sm uppercase tracking-[0.3em] text-white/40">Module</p>
-                <p className="text-lg font-medium text-white">{item}</p>
+              <div key={item} className="space-y-2">
+                <p className="text-lg font-semibold text-black">{item}</p>
+                <Link href="#experience" className="text-sm text-gray-500 hover:text-black transition-colors inline-flex items-center gap-1">
+                  Learn more <span>→</span>
+                </Link>
               </div>
             )
           )}
