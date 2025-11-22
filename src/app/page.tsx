@@ -70,15 +70,15 @@ export default function HomePage() {
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Features</NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid gap-3 p-6 md:w-[400px] lg:w-[500px]">
+                    <div className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] bg-white border border-gray-200 rounded-lg shadow-lg">
                       <div className="row-span-3">
                         <NavigationMenuLink asChild>
-                          <a className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md">
-                            <GraduationCap className="h-6 w-6" />
-                            <div className="mb-2 mt-4 text-lg font-medium">
+                          <a className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-blue-50 to-purple-50 p-6 no-underline outline-none focus:shadow-md transition-all hover:shadow-lg hover:scale-[1.02]">
+                            <GraduationCap className="h-6 w-6 text-blue-600" />
+                            <div className="mb-2 mt-4 text-lg font-medium text-gray-900">
                               SkillSyncAI Platform
                             </div>
-                            <p className="text-sm leading-tight text-muted-foreground">
+                            <p className="text-sm leading-tight text-gray-600">
                               Advanced AI-powered learning management system
                             </p>
                           </a>
@@ -86,11 +86,11 @@ export default function HomePage() {
                       </div>
                       <div className="grid gap-1">
                         <NavigationMenuLink asChild>
-                          <a className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                            <div className="text-sm font-medium leading-none">
+                          <a className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-all hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900 border border-transparent hover:border-gray-200">
+                            <div className="text-sm font-medium leading-none text-gray-900">
                               AI Learning
                             </div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
                               Personalized AI-driven learning paths
                             </p>
                           </a>
@@ -198,38 +198,106 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
+            whileHover={{ scale: 1.02 }}
           >
-            <div className="relative rounded-2xl border bg-gray-900 p-4 shadow-2xl">
-              <div className="flex items-center gap-2 pb-4">
-                <div className="flex gap-2">
-                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                  <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                </div>
-                <div className="ml-auto text-xs text-gray-400">
-                  dashboard.js
+            <div className="relative rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden">
+              {/* Dashboard Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                      <GraduationCap className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold">Student Dashboard</h3>
+                      <p className="text-white/80 text-xs">Welcome back, Alex!</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center"
+                    >
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-              <pre className="text-sm text-gray-300">
-                <code>{`const learningPath = {
-  student: "Alex Johnson",
-  progress: 78,
-  nextLesson: "Advanced React Patterns",
-  aiRecommendations: [
-    "Practice hooks with real projects",
-    "Review state management concepts",
-    "Build portfolio component"
-  ],
-  estimatedCompletion: "2 weeks"
-}
 
-// AI analyzes your learning style
-const personalizedPlan = 
-  await ai.generatePath(
-    learningPath,
-    studentProfile
-  )`}</code>
-              </pre>
+              {/* Stats Cards */}
+              <div className="p-6 grid grid-cols-3 gap-4">
+                {[
+                  { label: "Courses", value: "12", icon: BookOpen, color: "from-blue-500 to-blue-600" },
+                  { label: "Progress", value: "78%", icon: ChartBar, color: "from-green-500 to-green-600" },
+                  { label: "Streak", value: "15d", icon: Target, color: "from-purple-500 to-purple-600" }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="text-center p-3 rounded-lg bg-gray-50 border border-gray-200"
+                  >
+                    <div className={`h-6 w-6 mx-auto mb-2 rounded bg-gradient-to-r ${stat.color} flex items-center justify-center`}>
+                      <stat.icon className="h-3 w-3 text-white" />
+                    </div>
+                    <div className="text-lg font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Current Course */}
+              <div className="px-6 pb-6">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-gray-900">Current Course</h4>
+                    <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <Code className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-medium text-gray-900">Advanced React Patterns</h5>
+                      <p className="text-sm text-gray-600">Next: Custom Hooks Deep Dive</p>
+                      <div className="mt-2 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: "78%" }}
+                          transition={{ duration: 1.5, delay: 0.5 }}
+                          className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Recommendations */}
+              <div className="px-6 pb-6">
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-purple-600" />
+                  AI Recommendations
+                </h4>
+                <div className="space-y-2">
+                  {[
+                    "Practice hooks with real projects",
+                    "Review state management concepts",
+                    "Build portfolio component"
+                  ].map((rec, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
+                      whileHover={{ x: 5 }}
+                      className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700"
+                    >
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      {rec}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
             <motion.div
               animate={{

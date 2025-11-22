@@ -1,23 +1,61 @@
 import Link from "next/link";
 import { AuthForm } from "@/components/auth/auth-form";
+import { GraduationCap, ArrowRight } from "lucide-react";
 
 export default function SignUpPage() {
   return (
-    <div className="bg-canvas">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-4 py-16">
-        <div className="w-full max-w-xl space-y-6 rounded-[32px] border border-white/8 bg-gradient-to-br from-purple-900/40 via-black/40 to-cyan-900/30 p-10 shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
-          <p className="text-xs uppercase tracking-[0.4em] text-white/40">Residency intake</p>
-          <h1 className="text-4xl font-semibold text-white">Join Synapse LMS.</h1>
-          <p className="text-white/70">
-            Cohort builder referencing hyve.system textures, p5.js gradients, and trae.ai tone.
-          </p>
-          <AuthForm variant="sign-up" />
-          <p className="text-sm text-white/60">
-            Already inside?{" "}
-            <Link className="text-white" href="/sign-in">
-              Sign in
-            </Link>
-          </p>
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                SkillSyncAI
+              </span>
+            </div>
+          </div>
+
+          {/* Sign Up Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+              <p className="text-gray-600">Start your learning journey with SkillSyncAI</p>
+            </div>
+
+            <AuthForm variant="sign-up" />
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link 
+                  href="/sign-in" 
+                  className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
+                >
+                  Sign in
+                  <ArrowRight className="inline h-3 w-3 ml-1" />
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Footer Links */}
+          <div className="mt-8 text-center">
+            <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
+              <Link href="/privacy" className="hover:text-gray-700 transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-gray-700 transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/help" className="hover:text-gray-700 transition-colors">
+                Help Center
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

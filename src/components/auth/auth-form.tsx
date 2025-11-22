@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/common/ui/input';
-import { Button } from '@/components/common/ui/button';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 type AuthVariant = 'sign-in' | 'sign-up';
 
@@ -16,7 +17,7 @@ export function AuthForm({ variant }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const actionCopy = variant === 'sign-in' ? 'Access studio' : 'Join Synapse';
+  const actionCopy = variant === 'sign-in' ? 'Sign In' : 'Create Account';
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,7 +39,7 @@ export function AuthForm({ variant }: AuthFormProps) {
           typeof data?.error === 'string'
             ? data.error
             : Object.values<string[]>(data?.error ?? {})[0]?.[0] ??
-              'Something glitched. Try again.';
+              'Something went wrong. Please try again.';
         setError(message);
         return;
       }
@@ -52,43 +53,61 @@ export function AuthForm({ variant }: AuthFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {variant === 'sign-up' && (
         <div className="space-y-2">
-          <label className="text-xs uppercase tracking-[0.3em] text-white/50">Name</label>
+          <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+            Full Name
+          </Label>
           <Input
+            id="name"
             name="name"
-            placeholder="Atlas Rivera"
+            placeholder="John Doe"
             required
-            className="bg-white/5 text-white"
+            className="h-11"
           />
         </div>
       )}
+      
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-[0.3em] text-white/50">Email</label>
+        <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+          Email Address
+        </Label>
         <Input
+          id="email"
           name="email"
           type="email"
-          placeholder="you@studio.co"
+          placeholder="john@example.com"
           required
-          className="bg-white/5 text-white"
+          className="h-11"
         />
       </div>
+      
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-[0.3em] text-white/50">Password</label>
+        <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+          Password
+        </Label>
         <Input
+          id="password"
           name="password"
           type="password"
-          placeholder="********"
+          placeholder="••••••••"
           minLength={8}
           required
-          className="bg-white/5 text-white"
+          className="h-11"
         />
       </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {error && (
+        <div className="rounded-lg bg-red-50 p-3">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
       <Button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-white py-3 text-base font-semibold text-black hover:bg-white/90"
+        className="w-full h-11 text-base font-semibold"
+        variant={variant === 'sign-up' ? 'default' : 'outline'}
       >
-        {pending ? 'Calibrating...' : actionCopy}
+        {pending ? 'Please wait...' : actionCopy}
       </Button>
     </form>
   );
