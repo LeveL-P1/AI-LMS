@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Synapse LMS - Modern Learning Platform",
-  description: "The modern learning management system that adapts to your pace and helps you achieve your goals faster.",
+  title: "SkillSyncAI - AI-Powered Learning Platform",
+  description: "Transform your learning journey with AI-powered personalized education. Experience the future of online learning.",
 };
 
 export default function RootLayout({
