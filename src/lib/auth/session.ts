@@ -18,7 +18,8 @@ export async function createSession(userId: string) {
     },
   });
 
-  cookies().set(SESSION_COOKIE, token, {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -30,18 +31,20 @@ export async function createSession(userId: string) {
 }
 
 export async function destroySession() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return;
 
   await db.session.deleteMany({
     where: { token },
   });
 
-  cookies().delete(SESSION_COOKIE);
+  cookieStore.delete(SESSION_COOKIE);
 }
 
 export const getCurrentUser = cache(async () => {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
   const session = await db.session.findUnique({
@@ -52,13 +55,13 @@ export const getCurrentUser = cache(async () => {
   });
 
   if (!session) {
-    cookies().delete(SESSION_COOKIE);
+    cookieStore.delete(SESSION_COOKIE);
     return null;
   }
 
   if (session.expiresAt.getTime() < Date.now()) {
     await db.session.delete({ where: { token } }).catch(() => undefined);
-    cookies().delete(SESSION_COOKIE);
+    cookieStore.delete(SESSION_COOKIE);
     return null;
   }
 
