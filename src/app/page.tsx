@@ -193,12 +193,8 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
-            whileHover={{ scale: 1.02 }}
+          <div
+            className="relative hover:scale-[1.02] transition-transform duration-300"
           >
             <div className="relative rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden">
               {/* Dashboard Header */}
@@ -214,12 +210,8 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <motion.div
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center"
-                    >
-                    </motion.div>
+                    <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -231,17 +223,16 @@ export default function HomePage() {
                   { label: "Progress", value: "78%", icon: ChartBar, color: "from-green-500 to-green-600" },
                   { label: "Streak", value: "15d", icon: Target, color: "from-purple-500 to-purple-600" }
                 ].map((stat, index) => (
-                  <motion.div
+                  <div
                     key={index}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="text-center p-3 rounded-lg bg-gray-50 border border-gray-200"
+                    className="text-center p-3 rounded-lg bg-gray-50 border border-gray-200 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className={`h-6 w-6 mx-auto mb-2 rounded bg-gradient-to-r ${stat.color} flex items-center justify-center`}>
                       <stat.icon className="h-3 w-3 text-white" />
                     </div>
                     <div className="text-lg font-bold text-gray-900">{stat.value}</div>
                     <div className="text-xs text-gray-600">{stat.label}</div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
 
@@ -260,11 +251,9 @@ export default function HomePage() {
                       <h5 className="font-medium text-gray-900">Advanced React Patterns</h5>
                       <p className="text-sm text-gray-600">Next: Custom Hooks Deep Dive</p>
                       <div className="mt-2 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: "78%" }}
-                          transition={{ duration: 1.5, delay: 0.5 }}
+                        <div
                           className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+                          style={{ width: "78%" }}
                         />
                       </div>
                     </div>
@@ -284,34 +273,19 @@ export default function HomePage() {
                     "Review state management concepts",
                     "Build portfolio component"
                   ].map((rec, index) => (
-                    <motion.div
+                    <div
                       key={index}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                      className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700"
+                      className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700 hover:translate-x-1 transition-transform duration-300"
                     >
                       <CheckCircle className="h-3 w-3 text-green-500" />
                       {rec}
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
-            <motion.div
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.3, 0.8, 0.3],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-20 blur-xl"
-            />
-          </motion.div>
+            <div className="absolute -inset-4 rounded-2xl bg-gray-900/10 shadow-2xl" />
+          </div>
         </div>
       </section>
 
