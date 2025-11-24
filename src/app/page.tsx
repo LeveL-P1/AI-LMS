@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion } from "framer-motion";
@@ -579,7 +580,7 @@ export default function HomePage() {
                 Founded in 2024, SkillSyncAI is revolutionizing the way people
                 learn by combining cutting-edge artificial intelligence with
                 proven educational methodologies. Our platform adapts to each
-                learner's unique style, pace, and goals.
+                learner&apos;s unique style, pace, and goals.
               </p>
               <div className="grid gap-6 sm:grid-cols-2">
                 {[
@@ -666,7 +667,7 @@ export default function HomePage() {
               Get In Touch
             </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              Let's Build Your
+              Let&apos;s Build Your
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {" "}
                 Learning Journey
