@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const credentialsSchema = z.object({
-  email: z.string().email("Share a valid email"),
+  email: z.email("Share a valid email"),
   password: z
     .string()
     .min(8, "Use at least 8 characters")
