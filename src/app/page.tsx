@@ -129,10 +129,10 @@ export default function HomePage() {
 
             <div className="flex items-center space-x-4">
               <Button variant="ghost" asChild>
-                <Link href="/auth/login">Sign In</Link>
+                <Link href="/sign-in">Sign In</Link>
               </Button>
               <Button asChild>
-                <Link href="/auth/signup">Get Started</Link>
+                <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Button size="lg" className="group" asChild>
-                <Link href="/auth/signup">
+                <Link href="/sign-up">
                   Start Learning Free
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -539,7 +539,7 @@ export default function HomePage() {
                       variant={plan.popular ? "default" : "outline"}
                       asChild
                     >
-                      <Link href="/auth/signup">
+                      <Link href="/sign-up">
                         {plan.price === "Custom"
                           ? "Contact Sales"
                           : "Get Started"}

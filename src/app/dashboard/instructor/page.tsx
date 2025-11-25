@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { motion } from "framer-motion"
@@ -7,35 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { 
   BookOpen, 
-  Brain, 
-  ChartBar, 
-  Clock, 
-  Code, 
   GraduationCap, 
-  Laptop, 
-  PlayCircle, 
   Users, 
-  Zap,
   ArrowRight,
-  CheckCircle,
   Star,
-  Award,
-  Target,
-  Lightbulb,
   Rocket,
-  Shield,
-  Globe,
   Calendar,
-  TrendingUp,
   FileText,
-  Video,
-  Download,
   Settings,
   LogOut,
   Home,
-  BookMarked,
   User,
-  Bell,
   DollarSign,
   MessageSquare,
   BarChart3,

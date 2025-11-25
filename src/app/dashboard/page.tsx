@@ -41,8 +41,7 @@ export default async function DashboardPage() {
           <p className="text-xs uppercase tracking-[0.4em] text-white/40">Synapse console</p>
           <h1 className="text-4xl font-semibold">Welcome back, {user.name.split(" ")[0]}.</h1>
           <p className="text-white/70">
-            Keep exploring the cinematic curriculum. Supabase auth can drop in later without
-            touching this UX.
+            Keep exploring the cinematic curriculum. Your progress is automatically saved.
           </p>
         </header>
 

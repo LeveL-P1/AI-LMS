@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { motion } from "framer-motion"
@@ -314,7 +315,7 @@ export default function StudentDashboard() {
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle>Upcoming Assignments</CardTitle>
-                  <CardDescription>Don't miss these deadlines</CardDescription>
+                  <CardDescription>Don&apos;t miss these deadlines</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {upcomingAssignments.map((assignment, index) => (

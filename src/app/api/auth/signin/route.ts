@@ -52,6 +52,7 @@ export async function POST(request: Request) {
 
   await createSession(user.id);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { passwordHash, ...safeUser } = user;
   return NextResponse.json({ user: safeUser });
 }
