@@ -1,6 +1,7 @@
-## Synapse LMS
+## AI-LMS
+(60% Progress)
 
-A cinematic learning platform inspired by hyve.system, p5.js sketches, trae.ai choreography, and a splash of A24 mood. The repo now ships with:
+The repo now ships with:
 
 - A clean Prisma schema featuring local email/password auth, session tokens, and minimal Course/Chapter/Enrollment models.
 - Cookie-based authentication with `/api/auth/signin`, `/api/auth/signup`, `/api/auth/signout`, plus a reusable `getCurrentUser()` helper.
